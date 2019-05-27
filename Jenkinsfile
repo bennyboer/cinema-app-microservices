@@ -13,7 +13,7 @@ pipeline {
                     cd .ci/install/protoc
                     chmod +x ./install.sh
                     ls
-                    ./install.sh
+                    sh install.sh
                     cd ../../..
                     chmod +x ./build.sh
                     ./build.sh
