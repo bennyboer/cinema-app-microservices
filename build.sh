@@ -1,5 +1,4 @@
 #!/bin/sh
-
 echo "Fetching dependencies..."
 go get
 
@@ -8,3 +7,5 @@ cd ./user
 chmod +x ./build.sh
 ./build.sh
 cd ..
+
+read -n 1 -s -r -p "Press any key to continue"

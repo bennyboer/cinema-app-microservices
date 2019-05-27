@@ -3,6 +3,7 @@
 
 # Generated executables
 /.exe
+user-service
 
 # Generated protocol buffer files
 *.pb.go
