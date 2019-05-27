@@ -1,5 +1,6 @@
 #!/bin/sh
-echo 'Fetching dependencies...' & go get
+echo "Fetching dependencies..."
+go get
 
 echo "Compiling user service..."
 cd ./user
