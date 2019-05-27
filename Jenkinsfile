@@ -14,7 +14,7 @@ pipeline {
                     . ./install.sh
                     cd ../../..
                     chmod +x ./build.sh
-                    ./build.sh
+                    . ./build.sh
                 '''
             }
         }
