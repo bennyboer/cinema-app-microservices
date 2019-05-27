@@ -7,6 +7,7 @@ pipeline {
             }
             steps {
                 sh '''
+                    git reset --hard
                     go version
                     go env
                     cd .ci/install/protoc
