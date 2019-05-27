@@ -12,7 +12,7 @@ pipeline {
                     go env
                     cd .ci/install/protoc
                     chmod +x ./install.sh
-                    . ./install.sh
+                    ./install.sh
                     cd ../../..
                     chmod +x ./build.sh
                     ./build.sh
