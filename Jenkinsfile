@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             agent {
-                docker { image 'obraun/vss-jenkins' }
+                docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
                 sh '''
@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Test') {
             agent {
-                docker { image 'obraun/vss-jenkins' }
+                docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
                 sh 'echo run tests with code coverage...'
@@ -29,7 +29,7 @@ pipeline {
         }
         stage('Lint') {
             agent {
-                docker { image 'obraun/vss-jenkins' }
+                docker { image 'obraun/vss-protoactor-jenkins' }
             }   
             steps {
                 sh 'golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false'
