@@ -5,5 +5,5 @@
 /.exe
 
 # Generated protocol buffer files
-.pb.go
-.micro.go
+*.pb.go
+*.micro.go
