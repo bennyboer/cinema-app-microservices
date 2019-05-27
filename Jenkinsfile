@@ -7,8 +7,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    git reset --hard
-                    git config core.autocrlf
                     go version
                     go env
                     cd ci/install/protoc
