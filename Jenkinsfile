@@ -10,9 +10,8 @@ pipeline {
                     git reset --hard
                     go version
                     go env
-                    cd .ci/install/protoc
+                    cd ci/install/protoc
                     chmod +x ./install.sh
-                    ls
                     sh install.sh
                     cd ../../..
                     chmod +x ./build.sh
