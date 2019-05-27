@@ -1,2 +1,9 @@
-/.exe
+# IDE files
 .idea
+
+# Generated executables
+/.exe
+
+# Generated protocol buffer files
+.pb.go
+.micro.go
