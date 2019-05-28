@@ -1,0 +1,56 @@
+syntax = "proto3";
+package proto;
+
+service Cinema {
+    rpc Create (CreateRequest) returns (CreateResponse) {
+    }
+
+    rpc Delete (DeleteRequest) returns (DeleteResponse) {
+    }
+
+    rpc Search (SearchRequest) returns (SearchResponse) {
+    }
+
+    rpc List (ListRequest) returns (ListResponse) {
+    }
+}
+
+message CinemaData {
+    // Name of the cinema.
+    string name = 1;
+
+    // Cinema Id
+    int64 id = 2;
+}
+
+message CreateRequest {
+    string name = 1;
+}
+
+message CreateResponse {
+    int64 id = 2;
+}
+
+message DeleteRequest {
+    int64 id = 2;
+}
+
+message DeleteResponse {
+    bool success = 3;
+}
+
+message SearchRequest {
+    string name = 1;
+}
+
+message SearchResponse {
+    bool success = 3;
+    CinemaData = 4;
+}
+
+message ListRequest {
+}
+
+message ListResponse {
+    repeated CinemaData = 5;
+}
