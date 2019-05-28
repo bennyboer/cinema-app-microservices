@@ -4,4 +4,6 @@ go get
 
 echo "Compiling user service..."
 chmod +x ./user/build.sh
-. ./user/build.sh
+cd user
+. ./build.sh
+cd ..
