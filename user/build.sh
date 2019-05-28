@@ -1,6 +1,8 @@
 #!/bin/sh
 echo "Compiling protocol buffers..."
-chmod +x proto/build.sh
+pwd
+ls
+chmod +x ./proto/build.sh
 . ./proto/build.sh
 
 echo "Creating executable..."
