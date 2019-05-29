@@ -33,6 +33,7 @@ jobs:
       go:
         - 1.12.x
       script:
+        - GO111MODULE=on
         - go test ./... -cover
     - stage: lint
       name: "Lint Code"
@@ -41,10 +42,12 @@ jobs:
       before_script:
         - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.16.0
       script:
+        - GO111MODULE=on
         - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
     - stage: docs
       name: "Build Documentation"
       go:
         - 1.11.x
       script:
+        - GO111MODULE=on
         - echo Hello
