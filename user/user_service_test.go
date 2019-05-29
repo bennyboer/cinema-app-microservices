@@ -14,8 +14,14 @@ func registerServiceHandler(server server.Server) error {
 	return proto.RegisterUserHandler(server, s.NewUserServiceHandler())
 }
 
+var clientRef proto.UserService
+
 func initClient(serviceName string, clientService micro.Service) proto.UserService {
-	return proto.NewUserService(serviceName, clientService.Client())
+	if clientRef == nil {
+		clientRef = proto.NewUserService(serviceName, clientService.Client())
+	}
+
+	return clientRef
 }
 
 func TestUserService_Create(t *testing.T) {
