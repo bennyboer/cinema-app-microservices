@@ -6,6 +6,7 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/server"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -33,10 +34,11 @@ func TestServices(
 	// Start services to test
 	serviceList := make([]micro.Service, 0, len(services))
 	serviceChannel := make(chan micro.Service)
+	var wg sync.WaitGroup
 	for i := 0; i < len(services); i++ {
 		spec := services[i]
 
-		go startService(spec.ServiceName, t, spec.HandlerRegistrationFunc, serviceChannel)
+		go startService(spec.ServiceName, t, spec.HandlerRegistrationFunc, wg, serviceChannel)
 		serviceList = append(serviceList, <-serviceChannel)
 	}
 
@@ -52,19 +54,28 @@ func TestServices(
 	for i := 0; i < len(serviceList); i++ {
 		terminateService(t, serviceList[i])
 	}
+
+	wg.Wait() // Wait until all services are terminated
 }
 
 func startService(
 	name string,
 	t *testing.T,
 	registerHandlerFunc func(server server.Server) error,
+	wg sync.WaitGroup,
 	c chan micro.Service,
 ) {
+	wg.Add(1)
+
 	var service micro.Service
 	service = micro.NewService(
 		micro.Name(name),
 		micro.AfterStart(func() error {
 			c <- service
+			return nil
+		}),
+		micro.AfterStop(func() error {
+			wg.Done()
 			return nil
 		}),
 	)
