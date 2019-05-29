@@ -5,6 +5,10 @@ stages:
   - test
   - lint
   - docs
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
 jobs:
   include:
     - stage: build
@@ -32,6 +36,8 @@ jobs:
         - go test ./... -cover
     - stage: lint
       name: "Lint Code"
+      go:
+        - 1.12.x
       before_script:
         - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.16.0
       script:
