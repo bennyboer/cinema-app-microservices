@@ -1,6 +1,8 @@
 package microtest
 
 import (
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/server"
 	"os"
@@ -40,7 +42,7 @@ func TestServices(
 
 	// Start test client service to test with
 	clientService := micro.NewService(
-		micro.Name(testClientServiceName),
+		micro.Name(fmt.Sprintf("%s.%s", testClientServiceName, uuid.New().String())),
 	)
 	clientService.Init()
 
