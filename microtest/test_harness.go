@@ -1,7 +1,6 @@
 package microtest
 
 import (
-	"fmt"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/server"
 	"os"
@@ -13,6 +12,8 @@ const testClientServiceName = "_test_client_service"
 
 // Cached client service
 var clientService micro.Service
+// Cached services
+var serviceList []micro.Service
 
 // Specification for a micro service
 type ServiceSpec struct {
@@ -33,15 +34,17 @@ func TestServices(
 	defer func() { os.Args = oldArgs }()
 	os.Args = os.Args[:1]
 
-	// Start services to test
-	serviceList := make([]micro.Service, 0, len(services))
-	serviceChannel := make(chan micro.Service)
-	var wg sync.WaitGroup
-	for i := 0; i < len(services); i++ {
-		spec := services[i]
+	if serviceList == nil {
+		// Start services to test
+		serviceList := make([]micro.Service, 0, len(services))
+		serviceChannel := make(chan micro.Service)
+		var wg sync.WaitGroup
+		for i := 0; i < len(services); i++ {
+			spec := services[i]
 
-		go startService(spec.ServiceName, t, spec.HandlerRegistrationFunc, wg, serviceChannel)
-		serviceList = append(serviceList, <-serviceChannel)
+			go startService(spec.ServiceName, t, spec.HandlerRegistrationFunc, wg, serviceChannel)
+			serviceList = append(serviceList, <-serviceChannel)
+		}
 	}
 
 	if clientService == nil {
@@ -53,15 +56,6 @@ func TestServices(
 	}
 
 	testFunc(t, clientService)
-
-	// Terminate all services again
-	for i := 0; i < len(serviceList); i++ {
-		terminateService(t, serviceList[i])
-	}
-
-	fmt.Println("Waiting until all services are terminated...")
-	wg.Wait() // Wait until all services are terminated
-	fmt.Println("All services are now terminated...")
 }
 
 func startService(
