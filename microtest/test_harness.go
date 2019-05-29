@@ -2,7 +2,6 @@ package microtest
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/server"
 	"os"
@@ -11,6 +10,9 @@ import (
 )
 
 const testClientServiceName = "_test_client_service"
+
+// Cached client service
+var clientService micro.Service
 
 // Specification for a micro service
 type ServiceSpec struct {
@@ -42,11 +44,13 @@ func TestServices(
 		serviceList = append(serviceList, <-serviceChannel)
 	}
 
-	// Start test client service to test with
-	clientService := micro.NewService(
-		micro.Name(fmt.Sprintf("%s.%s", testClientServiceName, uuid.New().String())),
-	)
-	clientService.Init()
+	if clientService == nil {
+		// Start test client service to test with
+		clientService = micro.NewService(
+			micro.Name(testClientServiceName),
+		)
+		clientService.Init()
+	}
 
 	testFunc(t, clientService)
 
@@ -55,7 +59,9 @@ func TestServices(
 		terminateService(t, serviceList[i])
 	}
 
+	fmt.Println("Waiting until all services are terminated...")
 	wg.Wait() // Wait until all services are terminated
+	fmt.Println("All services are now terminated...")
 }
 
 func startService(

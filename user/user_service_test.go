@@ -44,7 +44,7 @@ func TestUserService_Create_EmptyName(t *testing.T) {
 	microtest.TestServices(t, []microtest.ServiceSpec{
 		{ServiceName: serviceName, HandlerRegistrationFunc: registerServiceHandler},
 	}, func(t *testing.T, clientService micro.Service) {
-		client := initClient(serviceName, clientService)
+		client := proto.NewUserService(serviceName, clientService.Client())
 
 		_, err := client.Create(context.TODO(), &proto.CreateRequest{
 			Data: &proto.UserData{
