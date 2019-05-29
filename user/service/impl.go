@@ -8,7 +8,7 @@ import (
 
 /// The user service implementation.
 type UserServiceHandler struct {
-	lastId int64
+	lastID int64
 	users  map[int64]*proto.UserData
 }
 
@@ -16,7 +16,7 @@ func NewUserServiceHandler() *UserServiceHandler {
 	users := make(map[int64]*proto.UserData)
 
 	return &UserServiceHandler{
-		lastId: 0,
+		lastID: 0,
 		users:  users,
 	}
 }
@@ -26,10 +26,10 @@ func (h *UserServiceHandler) Create(context context.Context, request *proto.Crea
 		return fmt.Errorf("cannot create user with empty name")
 	}
 
-	h.lastId++
-	h.users[h.lastId] = request.Data
+	h.lastID++
+	h.users[h.lastID] = request.Data
 
-	response.CreatedId = h.lastId
+	response.CreatedId = h.lastID
 	return nil
 }
 
