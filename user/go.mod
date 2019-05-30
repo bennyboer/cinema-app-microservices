@@ -7,5 +7,6 @@ require (
 	github.com/golang/protobuf v1.3.1
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/micro/go-micro v1.2.0
+	github.com/micro/protoc-gen-micro v0.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 )

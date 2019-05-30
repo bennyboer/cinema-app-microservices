@@ -2,11 +2,6 @@
 echo "Initializing environment..."
 export GO111MODULE=on
 
-echo "Fetching dependencies..."
-go get
-go install github.com/micro/protoc-gen-micro
-go install github.com/golang/protobuf/protoc-gen-go
-
 echo "Building user service..."
 chmod +x ./user/build.sh
 cd user
