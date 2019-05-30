@@ -2,25 +2,25 @@
 echo "Building user service..."
 chmod +x ./user/build.sh
 cd user
-. ./build.sh
+. ./build.sh "$1"
 cd ..
 
 echo "Building movie service..."
 chmod +x ./movie/build.sh
 cd movie
-. ./build.sh
+. ./build.sh "$1"
 cd ..
 
 echo "Building presentation service..."
 chmod +x ./presentation/build.sh
 cd presentation
-. ./build.sh
+. ./build.sh "$1"
 cd ..
 
 echo "Building reservation service..."
 chmod +x ./reservation/build.sh
 cd reservation
-. ./build.sh
+. ./build.sh "$1"
 cd ..
 
 if [[ "$1" == "debug" ]]; then

@@ -7,7 +7,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    git reset --hard
                     go version
                     go env
                     cd ci/install/protoc
@@ -15,7 +14,7 @@ pipeline {
                     . ./install.sh
                     cd ../../..
                     chmod +x ./build.sh
-                    . ./build.sh
+                    . ./build.sh upgrade
                 '''
             }
         }

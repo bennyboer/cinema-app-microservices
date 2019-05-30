@@ -3,7 +3,11 @@ echo "PRESENTATION SERVICE | Initializing environment..."
 export GO111MODULE=on
 
 echo "PRESENTATION SERVICE | Fetching dependencies..."
-go get
+if [[ "$1" == "upgrade" ]]; then
+    go get -u
+else
+    go get
+fi
 go install github.com/micro/protoc-gen-micro
 go install github.com/golang/protobuf/protoc-gen-go
 
