@@ -6,7 +6,7 @@ import (
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 )
 
-const initCapacity = 64;
+const initCapacity = 64
 
 // Implementation of the presentation service handler.
 type PresentationServiceHandler struct {
@@ -21,9 +21,9 @@ func NewPresentationServiceHandler() *PresentationServiceHandler {
 	}
 }
 
-func (h *PresentationServiceHandler) findPresentation(cinemaId int64, movieId int64) (data *proto.PresentationData, found bool) {
+func (h *PresentationServiceHandler) findPresentation(cinemaID int64, movieID int64) (data *proto.PresentationData, found bool) {
 	for _, data := range h.presentations {
-		if data.CinemaId == cinemaId && data.MovieId == movieId {
+		if data.CinemaId == cinemaID && data.MovieId == movieID {
 			return data, true
 		}
 	}
