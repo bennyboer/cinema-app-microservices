@@ -3,7 +3,10 @@ pipeline {
     stages {
         stage('Build') {
             agent {
-                docker { image 'obraun/vss-protoactor-jenkins' }
+                docker {
+                    image 'obraun/vss-protoactor-jenkins'
+                    args '-v $HOME/.cache/go-build:$HOME/gopath/pkg/mod'
+                }
             }
             steps {
                 sh '''
@@ -13,15 +16,17 @@ pipeline {
                     chmod +x ./install.sh
                     . ./install.sh
                     cd ../../..
-                    git config --global --add url."git@github.com:".insteadOf "https://github.com/"
                     chmod +x ./build.sh
-                    . ./build.sh upgrade
+                    . ./build.sh
                 '''
             }
         }
         stage('Test') {
             agent {
-                docker { image 'obraun/vss-protoactor-jenkins' }
+                docker {
+                    image 'obraun/vss-protoactor-jenkins'
+                    args '-v $HOME/.cache/go-build:$HOME/gopath/pkg/mod'
+                }
             }
             steps {
                 sh 'echo run tests with code coverage...'
@@ -31,7 +36,10 @@ pipeline {
         }
         stage('Lint') {
             agent {
-                docker { image 'obraun/vss-protoactor-jenkins' }
+                docker {
+                    image 'obraun/vss-protoactor-jenkins'
+                    args '-v $HOME/.cache/go-build:$HOME/gopath/pkg/mod'
+                }
             }   
             steps {
                 sh 'echo run tests with code coverage...'
