@@ -1,4 +1,4 @@
-package main
+package movie
 
 import (
 	"github.com/micro/go-micro"

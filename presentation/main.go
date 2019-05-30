@@ -1,4 +1,4 @@
-package main
+package presentation
 
 import (
 	"github.com/micro/go-micro"

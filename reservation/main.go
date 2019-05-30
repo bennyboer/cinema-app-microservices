@@ -1,4 +1,4 @@
-package main
+package reservation
 
 import (
 	"github.com/micro/go-micro"
