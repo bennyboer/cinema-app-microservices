@@ -21,5 +21,8 @@ script:
   - env GO111MODULE=on
   - chmod +x ./build.sh
   - ./build.sh
+  - go env
+  - env GO111MODULE=on
+  - go env
   - go test ./... -cover
   - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
