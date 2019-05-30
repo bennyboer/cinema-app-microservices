@@ -148,7 +148,7 @@ func (h *ReservationServiceHandler) AcceptReservation(context context.Context, r
 	}
 
 	// Try to mark seats as taken -> Will fail if seats have already been taken
-	err := h.markSeatsAsAvailable(false, context, reservation.Seats, reservation.PresentationId)
+	err := h.markSeatsAsAvailable(context, false, reservation.Seats, reservation.PresentationId)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (h *ReservationServiceHandler) Cancel(context context.Context, request *pro
 	}
 
 	// Mark seats as available
-	err := h.markSeatsAsAvailable(true, context, reservation.Seats, reservation.PresentationId)
+	err := h.markSeatsAsAvailable(context, true, reservation.Seats, reservation.PresentationId)
 	if err != nil {
 		return err
 	}
