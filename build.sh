@@ -1,7 +1,4 @@
 #!/bin/sh
-echo "Initializing environment..."
-export GO111MODULE=on
-
 echo "Building user service..."
 chmod +x ./user/build.sh
 cd user

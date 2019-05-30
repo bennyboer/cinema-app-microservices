@@ -25,7 +25,8 @@ pipeline {
             }
             steps {
                 sh 'echo run tests with code coverage...'
-                sh 'go test ./... -cover'
+                sh 'chmod +x ./test.sh'
+                sh '. ./test.sh'
             }
         }
         stage('Lint') {
@@ -33,7 +34,9 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }   
             steps {
-                sh 'golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false'
+                sh 'echo run tests with code coverage...'
+                sh 'chmod +x ./lint.sh'
+                sh '. ./lint.sh'
             }
         }
         stage('Build Docker Image') {

@@ -22,5 +22,7 @@ before_script:
 script:
   - chmod +x ./build.sh
   - ./build.sh
-  - go test ./... -cover
-  - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
+  - chmod +x ./test.sh
+  - ./test.sh
+  - chmod +x ./lint.sh
+  - ./lint.sh

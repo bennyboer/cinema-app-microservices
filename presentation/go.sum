@@ -494,8 +494,11 @@ github.com/nicolai86/scaleway-sdk v1.10.2-0.20180628010248-798f60e20bb2/go.mod h
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4 v0.0.0-20190530171822-2c90f3e94a08 h1:BJJVwd9pEmqOh9Yr1Jlo6P4EmU231KXypKTFnBVABhc=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4 v0.0.0-20190530171822-2c90f3e94a08/go.mod h1:nY8n3dobqGSmtvJerp+2lZKY2sBj6WGVpyy+1F0dYo4=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation v0.0.0-20190530171822-2c90f3e94a08/go.mod h1:43bm8pyxyUKp/KGv//freQfRlG8uXo02LZncYMrZiV4=
+github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation v0.0.0-20190530184359-6c4bcffe53b3/go.mod h1:hWFt+rxUNnXevf2Vx6RWJJv7dwtczp5mH04RWSGOPCg=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user v0.0.0-20190530171822-2c90f3e94a08 h1:bqp2MHt1OAkzWgSWaqmFISZFGCCjqDgDXW4M4S7e8iQ=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user v0.0.0-20190530171822-2c90f3e94a08/go.mod h1:ApXAgZHomMgHWORbWWrrHETObwE4oolbeLtw++82sPk=
+github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user v0.0.0-20190530184359-6c4bcffe53b3 h1:2HtbTxfUJhUI9Ijm4bUc5s6TFWwYHrMreeaw68rksUk=
+github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user v0.0.0-20190530184359-6c4bcffe53b3/go.mod h1:xpiJRowdosEiFKJmmjldVsVmg3wLohrQp1mV4gimZGg=
 github.com/oklog/run v0.0.0-20180308005104-6934b124db28/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=

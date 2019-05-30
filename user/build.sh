@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "USER SERVICE | Initializing environment..."
+export GO111MODULE=on
+
 echo "USER SERVICE | Fetching dependencies..."
 go get
 go install github.com/micro/protoc-gen-micro

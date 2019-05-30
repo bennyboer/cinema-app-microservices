@@ -495,7 +495,10 @@ github.com/ob-vss-ss19/blatt-4-sudo_blatt4 v0.0.0-20190530171822-2c90f3e94a08 h1
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4 v0.0.0-20190530171822-2c90f3e94a08/go.mod h1:nY8n3dobqGSmtvJerp+2lZKY2sBj6WGVpyy+1F0dYo4=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation v0.0.0-20190530171822-2c90f3e94a08 h1:kB5kZA8xAUWyVZmhlVxA0vf8C4Ycn4nhfvfmx8rQhac=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation v0.0.0-20190530171822-2c90f3e94a08/go.mod h1:43bm8pyxyUKp/KGv//freQfRlG8uXo02LZncYMrZiV4=
+github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation v0.0.0-20190530184359-6c4bcffe53b3 h1:rA7W+clAWjl57j91x0dgsF+laYg6xibVkGwvJSglpSE=
+github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation v0.0.0-20190530184359-6c4bcffe53b3/go.mod h1:hWFt+rxUNnXevf2Vx6RWJJv7dwtczp5mH04RWSGOPCg=
 github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user v0.0.0-20190530171822-2c90f3e94a08/go.mod h1:ApXAgZHomMgHWORbWWrrHETObwE4oolbeLtw++82sPk=
+github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user v0.0.0-20190530184359-6c4bcffe53b3/go.mod h1:xpiJRowdosEiFKJmmjldVsVmg3wLohrQp1mV4gimZGg=
 github.com/oklog/run v0.0.0-20180308005104-6934b124db28/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=

@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "RESERVATION SERVICE | Initializing environment..."
+export GO111MODULE=on
+
 echo "RESERVATION SERVICE | Fetching dependencies..."
 go get
 go install github.com/micro/protoc-gen-micro

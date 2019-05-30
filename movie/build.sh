@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "MOVIE SERVICE | Initializing environment..."
+export GO111MODULE=on
+
 echo "MOVIE SERVICE | Fetching dependencies..."
 go get
 go install github.com/micro/protoc-gen-micro
