@@ -1,4 +1,4 @@
-module github.com/ob-vss-ss19/blatt-4-sudo_blatt4
+module github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation
 
 go 1.12
 
