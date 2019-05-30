@@ -74,6 +74,7 @@ func (h *ReservationServiceHandler) markSeatsAsAvailable(context context.Context
 
 	fmt.Println(cinemaID)
 	fmt.Println(available)
+	fmt.Println(seats)
 	// TODO Ask cinema to mark seats to be available or fail
 
 	return nil
