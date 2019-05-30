@@ -17,6 +17,7 @@ pipeline {
                     chmod +x ./install.sh
                     . ./install.sh
                     cd ../../..
+                    export GIT_TERMINAL_PROMPT=1
                     chmod +x ./build.sh
                     . ./build.sh
                 '''
