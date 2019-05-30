@@ -3,26 +3,43 @@ package service
 import (
 	"context"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
+	reservation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
+	rs "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/service"
 	"testing"
 )
 
-func TestPresentationService_Create(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+func getHandler() *PresentationServiceHandler {
+	return NewPresentationServiceHandler(
+		&PresentationServiceDependencies{
+			ReservationService: func() reservation.ReservationService {
+				return &rs.MockReservationService{}
+			},
+		},
+	)
+}
 
+func TestPresentationService_Create(t *testing.T) {
+	handler := getHandler()
+
+	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
 			CinemaId: 1,
 			MovieId:  2,
 		},
-	}, &proto.CreateResponse{})
+	}, rsp)
 
 	if err != nil {
 		t.Fatalf("expected no error")
 	}
+
+	if rsp.CreatedId < 0 {
+		t.Errorf("expected created presentation id to be non-negative")
+	}
 }
 
 func TestPresentationService_Create_NegativeId(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
@@ -48,7 +65,7 @@ func TestPresentationService_Create_NegativeId(t *testing.T) {
 }
 
 func TestPresentationService_Create_AlreadyExistent(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
@@ -70,7 +87,7 @@ func TestPresentationService_Create_AlreadyExistent(t *testing.T) {
 }
 
 func TestPresentationService_FindForCinema(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
@@ -95,6 +112,10 @@ func TestPresentationService_FindForCinema(t *testing.T) {
 		t.Fatalf("expected no error")
 	}
 
+	if len(rsp.Ids) != 2 {
+		t.Fatalf("expected 2 presentation ids; got %d", len(rsp.Ids))
+	}
+
 	if len(rsp.Dates) != 2 {
 		t.Fatalf("expected 2 presentations; got %d", len(rsp.Dates))
 	}
@@ -105,7 +126,7 @@ func TestPresentationService_FindForCinema(t *testing.T) {
 }
 
 func TestPresentationService_FindForMovie(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
@@ -130,6 +151,10 @@ func TestPresentationService_FindForMovie(t *testing.T) {
 		t.Fatalf("expected no error")
 	}
 
+	if len(rsp.Ids) != 1 {
+		t.Fatalf("expected 1 presentation id; got %d", len(rsp.Ids))
+	}
+
 	if len(rsp.Dates) != 1 {
 		t.Fatalf("expected 1 presentations; got %d", len(rsp.Dates))
 	}
@@ -139,8 +164,48 @@ func TestPresentationService_FindForMovie(t *testing.T) {
 	}
 }
 
+func TestPresentationService_Read(t *testing.T) {
+	handler := getHandler()
+
+	createRsp := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 1,
+			MovieId:  2,
+		},
+	}, createRsp)
+
+	id := createRsp.CreatedId
+
+	rsp := &proto.ReadResponse{}
+	err := handler.Read(context.TODO(), &proto.ReadRequest{
+		Id: id,
+	}, rsp)
+
+	if err != nil {
+		t.Fatalf("expected no error")
+	}
+
+	if rsp.Data.CinemaId != 1 || rsp.Data.MovieId != 2 {
+		t.Errorf("expected cinema id %d and movie id %d; got %d and %d", 1, 2, rsp.Data.CinemaId, rsp.Data.MovieId)
+	}
+}
+
+func TestPresentationService_Read_NotFound(t *testing.T) {
+	handler := getHandler()
+
+	rsp := &proto.ReadResponse{}
+	err := handler.Read(context.TODO(), &proto.ReadRequest{
+		Id: 4,
+	}, rsp)
+
+	if err == nil {
+		t.Fatalf("expected error because the presentation is unavailable")
+	}
+}
+
 func TestPresentationService_ReadAll(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
@@ -170,26 +235,28 @@ func TestPresentationService_ReadAll(t *testing.T) {
 		t.Fatalf("expected no error")
 	}
 
+	if len(rsp.Ids) != 3 {
+		t.Fatalf("expected 3 presentation ids; got %d", len(rsp.Ids))
+	}
+
 	if len(rsp.Dates) != 3 {
 		t.Fatalf("expected 3 presentations; got %d", len(rsp.Dates))
 	}
 }
 
 func TestPresentationService_Delete(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
+	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.PresentationData{
 			CinemaId: 1,
 			MovieId:  2,
 		},
-	}, &proto.CreateResponse{})
+	}, createRsp)
 
 	err := handler.Delete(context.TODO(), &proto.DeleteRequest{
-		Data: &proto.PresentationData{
-			CinemaId: 1,
-			MovieId:  2,
-		},
+		Id: createRsp.CreatedId,
 	}, &proto.DeleteResponse{})
 
 	if err != nil {
@@ -198,13 +265,10 @@ func TestPresentationService_Delete(t *testing.T) {
 }
 
 func TestPresentationService_Delete_NotExistent(t *testing.T) {
-	handler := NewPresentationServiceHandler()
+	handler := getHandler()
 
 	err := handler.Delete(context.TODO(), &proto.DeleteRequest{
-		Data: &proto.PresentationData{
-			CinemaId: 1,
-			MovieId:  2,
-		},
+		Id: 36,
 	}, &proto.DeleteResponse{})
 
 	if err == nil {

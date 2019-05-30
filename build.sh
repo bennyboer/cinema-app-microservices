@@ -25,6 +25,12 @@ cd presentation
 . ./build.sh
 cd ..
 
+echo "Building reservation service..."
+chmod +x ./reservation/build.sh
+cd reservation
+. ./build.sh
+cd ..
+
 if [[ "$1" == "debug" ]]; then
     read -n 1 -s -r -p "Press any key to continue"
 fi

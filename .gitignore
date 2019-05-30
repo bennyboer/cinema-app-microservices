@@ -4,6 +4,10 @@
 # Generated executables
 /.exe
 user-service
+reservation-service
+presentation-service
+cinema-service
+movie-service
 
 # Generated protocol buffer files
 *.pb.go

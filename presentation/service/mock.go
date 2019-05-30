@@ -36,6 +36,15 @@ func (s *MockPresentationService) FindForMovie(ctx context.Context, in *proto.Fi
 	}, nil
 }
 
+func (s *MockPresentationService) Read(ctx context.Context, in *proto.ReadRequest, opts ...client.CallOption) (*proto.ReadResponse, error) {
+	return &proto.ReadResponse{
+		Data: &proto.PresentationData{
+			MovieId:  1,
+			CinemaId: 1,
+		},
+	}, nil
+}
+
 func (s *MockPresentationService) ReadAll(ctx context.Context, in *proto.ReadAllRequest, opts ...client.CallOption) (*proto.ReadAllResponse, error) {
 	return &proto.ReadAllResponse{
 		Dates: []*proto.PresentationData{

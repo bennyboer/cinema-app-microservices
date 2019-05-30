@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie/proto"
 	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
+	"sync"
 )
 
 // The movie service implementation.
@@ -12,6 +13,7 @@ type MovieServiceHandler struct {
 	lastID       int64
 	movies       map[int64]*proto.MovieData
 	dependencies MovieServiceDependencies
+	mux          sync.RWMutex
 }
 
 // Struct holding all services suppliers the movie service depends on.
@@ -34,6 +36,9 @@ func (h *MovieServiceHandler) Create(context context.Context, request *proto.Cre
 		return fmt.Errorf("cannot create movie with empty title")
 	}
 
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
 	h.lastID++
 	h.movies[h.lastID] = request.Data
 
@@ -42,6 +47,9 @@ func (h *MovieServiceHandler) Create(context context.Context, request *proto.Cre
 }
 
 func (h *MovieServiceHandler) Read(context context.Context, request *proto.ReadRequest, response *proto.ReadResponse) error {
+	h.mux.RLock()
+	defer h.mux.RUnlock()
+
 	data, ok := h.movies[request.Id]
 	if !ok {
 		return fmt.Errorf("could not find movie with id %d", request.Id)
@@ -53,6 +61,9 @@ func (h *MovieServiceHandler) Read(context context.Context, request *proto.ReadR
 }
 
 func (h *MovieServiceHandler) ReadAll(context context.Context, request *proto.ReadAllRequest, response *proto.ReadAllResponse) error {
+	h.mux.RLock()
+	defer h.mux.RUnlock()
+
 	size := len(h.movies)
 
 	ids := make([]int64, 0, size)
@@ -74,6 +85,9 @@ func (h *MovieServiceHandler) Update(context context.Context, request *proto.Upd
 		return fmt.Errorf("title of a movie cannot be empty")
 	}
 
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
 	data, ok := h.movies[request.Id]
 	if !ok {
 		return fmt.Errorf("movie to update with id %d could not be found", request.Id)
@@ -85,6 +99,9 @@ func (h *MovieServiceHandler) Update(context context.Context, request *proto.Upd
 }
 
 func (h *MovieServiceHandler) Delete(context context.Context, request *proto.DeleteRequest, response *proto.DeleteResponse) error {
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
 	_, ok := h.movies[request.Id]
 	if !ok {
 		return fmt.Errorf("movie to delete with id %d could not be found", request.Id)
@@ -103,10 +120,7 @@ func (h *MovieServiceHandler) Delete(context context.Context, request *proto.Del
 
 // Cancel all presentations related to the passed movieID.
 func (h *MovieServiceHandler) cancelRelatedPresentations(context context.Context, movieID int64) error {
-	presentationService, err := h.getPresentationService()
-	if err != nil {
-		return err
-	}
+	presentationService := h.getPresentationService()
 
 	rsp, err := presentationService.FindForMovie(context, &presentation.FindForMovieRequest{
 		MovieId: movieID,
@@ -115,9 +129,9 @@ func (h *MovieServiceHandler) cancelRelatedPresentations(context context.Context
 		return err
 	}
 
-	for _, p := range rsp.Dates {
+	for _, id := range rsp.Ids {
 		_, err := presentationService.Delete(context, &presentation.DeleteRequest{
-			Data: p,
+			Id: id,
 		})
 		if err != nil {
 			return err
@@ -128,13 +142,6 @@ func (h *MovieServiceHandler) cancelRelatedPresentations(context context.Context
 }
 
 // Get the presentation service
-func (h *MovieServiceHandler) getPresentationService() (presentation.PresentationService, error) {
-	service := h.dependencies.PresentationService()
-
-	presentationService, ok := service.(presentation.PresentationService)
-	if !ok {
-		return nil, fmt.Errorf("movie deletion could not be propagated to the presentation service, as the service is not of type PresentationService")
-	}
-
-	return presentationService, nil
+func (h *MovieServiceHandler) getPresentationService() presentation.PresentationService {
+	return h.dependencies.PresentationService()
 }

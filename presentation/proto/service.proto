@@ -11,6 +11,9 @@ service Presentation {
     rpc FindForMovie (FindForMovieRequest) returns (FindForMovieResponse) {
     }
 
+    rpc Read (ReadRequest) returns (ReadResponse) {
+    }
+
     rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
     }
 
@@ -19,8 +22,8 @@ service Presentation {
 }
 
 message PresentationData {
-    int64 cinemaId = 1;
-    int64 movieId = 2;
+    int64 cinemaId = 2;
+    int64 movieId = 3;
 }
 
 message CreateRequest {
@@ -28,6 +31,7 @@ message CreateRequest {
 }
 
 message CreateResponse {
+    int64 createdId = 1;
 }
 
 message FindForCinemaRequest {
@@ -35,7 +39,8 @@ message FindForCinemaRequest {
 }
 
 message FindForCinemaResponse {
-    repeated PresentationData dates = 1;
+    repeated int64 ids = 1;
+    repeated PresentationData dates = 2;
 }
 
 message FindForMovieRequest {
@@ -43,18 +48,28 @@ message FindForMovieRequest {
 }
 
 message FindForMovieResponse {
-    repeated PresentationData dates = 1;
+    repeated int64 ids = 1;
+    repeated PresentationData dates = 2;
+}
+
+message ReadRequest {
+    int64 id = 1;
+}
+
+message ReadResponse {
+    PresentationData data = 1;
 }
 
 message ReadAllRequest {
 }
 
 message ReadAllResponse {
-    repeated PresentationData dates = 1;
+    repeated int64 ids = 1;
+    repeated PresentationData dates = 2;
 }
 
 message DeleteRequest {
-    PresentationData data = 1;
+    int64 id = 1;
 }
 
 message DeleteResponse {

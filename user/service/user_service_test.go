@@ -2,12 +2,24 @@ package service
 
 import (
 	"context"
+	reservation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
+	rs "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/service"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user/proto"
 	"testing"
 )
 
+func getHandler() *UserServiceHandler {
+	return NewUserServiceHandler(
+		&UserServiceDependencies{
+			ReservationService: func() reservation.ReservationService {
+				return &rs.MockReservationService{}
+			},
+		},
+	)
+}
+
 func TestUserService_Create(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
@@ -26,7 +38,7 @@ func TestUserService_Create(t *testing.T) {
 }
 
 func TestUserService_Create_EmptyName(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
@@ -41,7 +53,7 @@ func TestUserService_Create_EmptyName(t *testing.T) {
 }
 
 func TestUserService_Read(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
@@ -71,7 +83,7 @@ func TestUserService_Read(t *testing.T) {
 }
 
 func TestUserService_Read_Unsuccessful(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	rsp := &proto.ReadResponse{}
 	err := handler.Read(context.TODO(), &proto.ReadRequest{
@@ -84,7 +96,7 @@ func TestUserService_Read_Unsuccessful(t *testing.T) {
 }
 
 func TestUserService_ReadAll(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.UserData{
@@ -121,7 +133,7 @@ func TestUserService_ReadAll(t *testing.T) {
 }
 
 func TestUserService_Update(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
@@ -153,7 +165,7 @@ func TestUserService_Update(t *testing.T) {
 }
 
 func TestUserService_Update_Unsuccessful(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	err := handler.Update(context.TODO(), &proto.UpdateRequest{
 		Id: 5,
@@ -168,7 +180,7 @@ func TestUserService_Update_Unsuccessful(t *testing.T) {
 }
 
 func TestUserService_Delete(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
@@ -197,7 +209,7 @@ func TestUserService_Delete(t *testing.T) {
 }
 
 func TestUserService_Delete_Unsuccessful(t *testing.T) {
-	handler := NewUserServiceHandler()
+	handler := getHandler()
 
 	err := handler.Delete(context.TODO(), &proto.DeleteRequest{
 		Id: 6,
