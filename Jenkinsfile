@@ -13,6 +13,7 @@ pipeline {
                     chmod +x ./install.sh
                     . ./install.sh
                     cd ../../..
+                    git config --global --add url."git@github.com:".insteadOf "https://github.com/"
                     chmod +x ./build.sh
                     . ./build.sh upgrade
                 '''
