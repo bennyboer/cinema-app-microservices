@@ -17,7 +17,7 @@ pipeline {
                     chmod +x ./install.sh
                     . ./install.sh
                     cd ../../..
-                    export GIT_TERMINAL_PROMPT=1
+                    echo GIT_ASKPASS
                     chmod +x ./build.sh
                     . ./build.sh
                 '''
