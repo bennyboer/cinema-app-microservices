@@ -84,5 +84,7 @@ func (h *UserServiceHandler) Delete(context context.Context, request *proto.Dele
 
 	delete(h.users, request.Id)
 
+	// TODO Notify reservation service
+
 	return nil
 }
