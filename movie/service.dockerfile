@@ -1,7 +1,7 @@
 FROM obraun/vss-protoactor-jenkins as builder
 COPY . /apps
 WORKDIR /apps
-RUN build.sh
+RUN sh build.sh
 
 FROM iron/go
 EXPOSE 8091
