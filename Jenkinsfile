@@ -9,6 +9,7 @@ pipeline {
                 }
             }
             steps {
+                sh 'echo "$GIT_ASKPASS"'
                 sh '''
                     cat /etc/os-release
                     go version
@@ -17,7 +18,6 @@ pipeline {
                     chmod +x ./install.sh
                     . ./install.sh
                     cd ../../..
-                    printenv GIT_ASKPASS
                     chmod +x ./build.sh
                     . ./build.sh
                 '''
