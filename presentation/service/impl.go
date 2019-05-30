@@ -10,7 +10,7 @@ import (
 
 // Implementation of the presentation service handler.
 type PresentationServiceHandler struct {
-	lastId        int64
+	lastID        int64
 	presentations map[int64]*proto.PresentationData
 	dependencies  PresentationServiceDependencies
 	mux           sync.RWMutex
@@ -25,7 +25,7 @@ func NewPresentationServiceHandler(dependencies *PresentationServiceDependencies
 	presentations := make(map[int64]*proto.PresentationData)
 
 	return &PresentationServiceHandler{
-		lastId:        0,
+		lastID:        0,
 		presentations: presentations,
 		dependencies:  *dependencies,
 	}
@@ -56,10 +56,10 @@ func (h *PresentationServiceHandler) Create(context context.Context, request *pr
 	}
 
 	// Create
-	h.lastId++
-	h.presentations[h.lastId] = request.Data
+	h.lastID++
+	h.presentations[h.lastID] = request.Data
 
-	response.CreatedId = h.lastId
+	response.CreatedId = h.lastID
 
 	return nil
 }

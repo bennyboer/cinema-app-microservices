@@ -58,6 +58,7 @@ func (h *ReservationServiceHandler) checkSeatsAvailable(context context.Context,
 	}
 
 	fmt.Println(cinemaID)
+	fmt.Println(seats)
 	// TODO Ask cinema if seats are still available
 
 	return true, nil
@@ -72,7 +73,7 @@ func (h *ReservationServiceHandler) markSeatsAsAvailable(available bool, context
 	}
 
 	fmt.Println(cinemaID)
-
+	fmt.Println(available)
 	// TODO Ask cinema to mark seats to be available or fail
 
 	return nil
