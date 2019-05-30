@@ -2,17 +2,17 @@ package service
 
 import (
 	"context"
-	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user/proto"
+	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie/proto"
 	"testing"
 )
 
-func TestUserService_Create(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Create(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Max Mustermann",
+		Data: &proto.MovieData{
+			Title: "Inception",
 		},
 	}, rsp)
 
@@ -21,17 +21,17 @@ func TestUserService_Create(t *testing.T) {
 	}
 
 	if rsp.CreatedId < 0 {
-		t.Errorf("expected created user id to be non-negative")
+		t.Errorf("expected created movie id to be non-negative")
 	}
 }
 
-func TestUserService_Create_EmptyName(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Create_EmptyTitle(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "",
+		Data: &proto.MovieData{
+			Title: "",
 		},
 	}, rsp)
 
@@ -40,13 +40,13 @@ func TestUserService_Create_EmptyName(t *testing.T) {
 	}
 }
 
-func TestUserService_Read(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Read(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Max Mustermann",
+		Data: &proto.MovieData{
+			Title: "Inception",
 		},
 	}, createRsp)
 
@@ -65,13 +65,13 @@ func TestUserService_Read(t *testing.T) {
 		t.Errorf("expected id %d, got %d\n", id, rsp.Id)
 	}
 
-	if rsp.Data.Name != "Max Mustermann" {
-		t.Errorf("expected name of the read user to be '%s' and not '%s'\n", "Max Mustermann", rsp.Data.Name)
+	if rsp.Data.Title != "Inception" {
+		t.Errorf("expected name of the read movie to be '%s' and not '%s'\n", "Inception", rsp.Data.Title)
 	}
 }
 
-func TestUserService_Read_Unsuccessful(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Read_Unsuccessful(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	rsp := &proto.ReadResponse{}
 	err := handler.Read(context.TODO(), &proto.ReadRequest{
@@ -83,24 +83,24 @@ func TestUserService_Read_Unsuccessful(t *testing.T) {
 	}
 }
 
-func TestUserService_ReadAll(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_ReadAll(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Max Mustermann",
+		Data: &proto.MovieData{
+			Title: "Inception",
 		},
 	}, &proto.CreateResponse{})
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Another Name",
+		Data: &proto.MovieData{
+			Title: "Lord of the Rings",
 		},
 	}, &proto.CreateResponse{})
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Hello World",
+		Data: &proto.MovieData{
+			Title: "Titanic",
 		},
 	}, &proto.CreateResponse{})
 
@@ -112,21 +112,21 @@ func TestUserService_ReadAll(t *testing.T) {
 	}
 
 	if len(rsp.Ids) != 3 {
-		t.Errorf("expected to find all 3 user ids, got %d", len(rsp.Ids))
+		t.Errorf("expected to find all 3 movie ids, got %d", len(rsp.Ids))
 	}
 
 	if len(rsp.Dates) != 3 {
-		t.Errorf("expected to find all 3 user dates, got %d", len(rsp.Ids))
+		t.Errorf("expected to find all 3 movie dates, got %d", len(rsp.Ids))
 	}
 }
 
-func TestUserService_Update(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Update(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Max Mustermann",
+		Data: &proto.MovieData{
+			Title: "Inception",
 		},
 	}, createRsp)
 
@@ -134,8 +134,8 @@ func TestUserService_Update(t *testing.T) {
 
 	err := handler.Update(context.TODO(), &proto.UpdateRequest{
 		Id: id,
-		Data: &proto.UserData{
-			Name: "Another Name",
+		Data: &proto.MovieData{
+			Title: "Lord of the Rings",
 		},
 	}, &proto.UpdateResponse{})
 	if err != nil {
@@ -147,18 +147,18 @@ func TestUserService_Update(t *testing.T) {
 		Id: id,
 	}, readRsp)
 
-	if readRsp.Data.Name != "Another Name" {
-		t.Errorf("expected update to actually change the name")
+	if readRsp.Data.Title != "Lord of the Rings" {
+		t.Errorf("expected update to actually change the title")
 	}
 }
 
-func TestUserService_Update_Unsuccessful(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Update_Unsuccessful(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	err := handler.Update(context.TODO(), &proto.UpdateRequest{
 		Id: 5,
-		Data: &proto.UserData{
-			Name: "Another Name",
+		Data: &proto.MovieData{
+			Title: "Another Title",
 		},
 	}, &proto.UpdateResponse{})
 
@@ -167,13 +167,13 @@ func TestUserService_Update_Unsuccessful(t *testing.T) {
 	}
 }
 
-func TestUserService_Delete(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Delete(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
-		Data: &proto.UserData{
-			Name: "Max Mustermann",
+		Data: &proto.MovieData{
+			Title: "Inception",
 		},
 	}, createRsp)
 
@@ -192,12 +192,12 @@ func TestUserService_Delete(t *testing.T) {
 	}, &proto.ReadResponse{})
 
 	if err == nil {
-		t.Errorf("expected delete to actually delete the user")
+		t.Errorf("expected delete to actually delete the movie")
 	}
 }
 
-func TestUserService_Delete_Unsuccessful(t *testing.T) {
-	handler := NewUserServiceHandler()
+func TestMovieService_Delete_Unsuccessful(t *testing.T) {
+	handler := NewMovieServiceHandler()
 
 	err := handler.Delete(context.TODO(), &proto.DeleteRequest{
 		Id: 6,
