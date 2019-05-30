@@ -17,7 +17,7 @@ pipeline {
                     chmod +x ./install.sh
                     . ./install.sh
                     cd ../../..
-                    echo "$GIT_ASKPASS"
+                    echo \'$GIT_ASKPASS\'
                     chmod +x ./build.sh
                     . ./build.sh
                 '''
