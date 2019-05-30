@@ -3,11 +3,23 @@ package service
 import (
 	"context"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie/proto"
+	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
+	ps "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/service"
 	"testing"
 )
 
+func getHandler() *MovieServiceHandler {
+	return NewMovieServiceHandler(
+		&MovieServiceDependencies{
+			PresentationService: func() presentation.PresentationService {
+				return &ps.MockPresentationService{}
+			},
+		},
+	)
+}
+
 func TestMovieService_Create(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
@@ -26,7 +38,7 @@ func TestMovieService_Create(t *testing.T) {
 }
 
 func TestMovieService_Create_EmptyTitle(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	rsp := &proto.CreateResponse{}
 	err := handler.Create(context.TODO(), &proto.CreateRequest{
@@ -41,7 +53,7 @@ func TestMovieService_Create_EmptyTitle(t *testing.T) {
 }
 
 func TestMovieService_Read(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
@@ -71,7 +83,7 @@ func TestMovieService_Read(t *testing.T) {
 }
 
 func TestMovieService_Read_Unsuccessful(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	rsp := &proto.ReadResponse{}
 	err := handler.Read(context.TODO(), &proto.ReadRequest{
@@ -84,7 +96,7 @@ func TestMovieService_Read_Unsuccessful(t *testing.T) {
 }
 
 func TestMovieService_ReadAll(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
 		Data: &proto.MovieData{
@@ -121,7 +133,7 @@ func TestMovieService_ReadAll(t *testing.T) {
 }
 
 func TestMovieService_Update(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
@@ -153,7 +165,7 @@ func TestMovieService_Update(t *testing.T) {
 }
 
 func TestMovieService_Update_Unsuccessful(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	err := handler.Update(context.TODO(), &proto.UpdateRequest{
 		Id: 5,
@@ -168,7 +180,7 @@ func TestMovieService_Update_Unsuccessful(t *testing.T) {
 }
 
 func TestMovieService_Delete(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	createRsp := &proto.CreateResponse{}
 	_ = handler.Create(context.TODO(), &proto.CreateRequest{
@@ -197,7 +209,7 @@ func TestMovieService_Delete(t *testing.T) {
 }
 
 func TestMovieService_Delete_Unsuccessful(t *testing.T) {
-	handler := NewMovieServiceHandler()
+	handler := getHandler()
 
 	err := handler.Delete(context.TODO(), &proto.DeleteRequest{
 		Id: 6,

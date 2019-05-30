@@ -107,5 +107,7 @@ func (h *PresentationServiceHandler) Delete(context context.Context, request *pr
 
 	h.presentations = append(h.presentations[:index2Remove], h.presentations[index2Remove+1:]...)
 
+	// TODO Notify reservation service
+
 	return nil
 }

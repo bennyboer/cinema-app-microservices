@@ -4,6 +4,7 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie/proto"
 	s "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie/service"
+	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 	"log"
 )
 
@@ -16,7 +17,13 @@ func main() {
 
 	service.Init()
 
-	err := proto.RegisterMovieHandler(service.Server(), s.NewMovieServiceHandler())
+	err := proto.RegisterMovieHandler(service.Server(), s.NewMovieServiceHandler(
+		&s.MovieServiceDependencies{
+			PresentationService: func() presentation.PresentationService {
+				return presentation.NewPresentationService("presentation-service", service.Client())
+			},
+		},
+	))
 	if err != nil {
 		log.Fatalf("Failed to register movie service handler. Error:\n%s", err.Error())
 	}

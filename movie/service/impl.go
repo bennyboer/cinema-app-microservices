@@ -4,20 +4,28 @@ import (
 	"context"
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie/proto"
+	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 )
 
 // The movie service implementation.
 type MovieServiceHandler struct {
-	lastID int64
-	movies map[int64]*proto.MovieData
+	lastID       int64
+	movies       map[int64]*proto.MovieData
+	dependencies MovieServiceDependencies
 }
 
-func NewMovieServiceHandler() *MovieServiceHandler {
+// Struct holding all services suppliers the movie service depends on.
+type MovieServiceDependencies struct {
+	PresentationService func() presentation.PresentationService
+}
+
+func NewMovieServiceHandler(dependencies *MovieServiceDependencies) *MovieServiceHandler {
 	movies := make(map[int64]*proto.MovieData)
 
 	return &MovieServiceHandler{
-		lastID: 0,
-		movies: movies,
+		lastID:       0,
+		movies:       movies,
+		dependencies: *dependencies,
 	}
 }
 
@@ -84,5 +92,49 @@ func (h *MovieServiceHandler) Delete(context context.Context, request *proto.Del
 
 	delete(h.movies, request.Id)
 
+	// Notify presentation service that movie has been deleted -> Cancel all related presentations
+	err := h.cancelRelatedPresentations(context, request.Id)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// Cancel all presentations related to the passed movieID.
+func (h *MovieServiceHandler) cancelRelatedPresentations(context context.Context, movieID int64) error {
+	presentationService, err := h.getPresentationService()
+	if err != nil {
+		return err
+	}
+
+	rsp, err := presentationService.FindForMovie(context, &presentation.FindForMovieRequest{
+		MovieId: movieID,
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, p := range rsp.Dates {
+		_, err := presentationService.Delete(context, &presentation.DeleteRequest{
+			Data: p,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Get the presentation service
+func (h *MovieServiceHandler) getPresentationService() (presentation.PresentationService, error) {
+	service := h.dependencies.PresentationService()
+
+	presentationService, ok := service.(presentation.PresentationService)
+	if !ok {
+		return nil, fmt.Errorf("movie deletion could not be propagated to the presentation service, as the service is not of type PresentationService")
+	}
+
+	return presentationService, nil
 }
