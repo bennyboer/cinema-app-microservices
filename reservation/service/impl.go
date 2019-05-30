@@ -66,7 +66,7 @@ func (h *ReservationServiceHandler) checkSeatsAvailable(context context.Context,
 
 // Try to mark the passed seats as available (or not if false is passed).
 // Will fail if the seats are not available.
-func (h *ReservationServiceHandler) markSeatsAsAvailable(available bool, context context.Context, seats []*proto.Seat, presentationID int64) error {
+func (h *ReservationServiceHandler) markSeatsAsAvailable(context context.Context, available bool, seats []*proto.Seat, presentationID int64) error {
 	cinemaID, err := h.getCinemaIDForPresentation(context, presentationID)
 	if err != nil {
 		return err
