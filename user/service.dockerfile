@@ -1,8 +1,8 @@
 FROM obraun/vss-protoactor-jenkins as builder
-COPY ./user /user-service-app
-WORKDIR /user-service-app
-RUN go build -o user-service main.go
+COPY . /apps
+WORKDIR /apps
+RUN build.sh
 
 FROM iron/go
 EXPOSE 8091
-ENTRYPOINT ["/user-service-app/user-service"]
+ENTRYPOINT ["/apps/user/user-service"]

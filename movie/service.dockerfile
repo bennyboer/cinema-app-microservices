@@ -1,8 +1,8 @@
 FROM obraun/vss-protoactor-jenkins as builder
-COPY ./movie /movie-service-app
-WORKDIR /movie-service-app
-RUN go build -o movie-service main.go
+COPY . /apps
+WORKDIR /apps
+RUN build.sh
 
 FROM iron/go
-EXPOSE 8093
-ENTRYPOINT ["/movie-service-app/movie-service"]
+EXPOSE 8091
+ENTRYPOINT ["/apps/movie/movie-service"]

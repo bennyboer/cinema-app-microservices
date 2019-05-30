@@ -34,6 +34,8 @@ jobs:
         - 1.12.x
       script:
         - GO111MODULE=on
+        - chmod +x ./build.sh
+        - ./build.sh
         - go test ./... -cover
     - stage: lint
       name: "Lint Code"
