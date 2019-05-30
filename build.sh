@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "Initializing environment..."
+export GO111MODULE=on
+
 echo "Fetching dependencies..."
 go get
 go install github.com/micro/protoc-gen-micro
@@ -13,6 +16,12 @@ cd ..
 echo "Building movie service..."
 chmod +x ./movie/build.sh
 cd movie
+. ./build.sh
+cd ..
+
+echo "Building presentation service..."
+chmod +x ./presentation/build.sh
+cd presentation
 . ./build.sh
 cd ..
 
