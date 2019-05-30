@@ -16,7 +16,7 @@ func main() {
 
 	service.Init()
 
-	err := proto.RegisterUserHandler(service.Server(), &s.UserServiceHandler{})
+	err := proto.RegisterUserHandler(service.Server(), s.NewUserServiceHandler())
 	if err != nil {
 		log.Fatalf("Failed to register user service handler. Error:\n%s", err.Error())
 	}

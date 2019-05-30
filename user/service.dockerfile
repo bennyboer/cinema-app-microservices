@@ -1,4 +1,4 @@
-FROM obraun/vss-jenkins as builder
+FROM obraun/vss-protoactor-jenkins as builder
 COPY ./user /user-service-app
 WORKDIR /user-service-app
 RUN go build -o user-service main.go

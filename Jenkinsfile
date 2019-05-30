@@ -39,6 +39,7 @@ pipeline {
             agent any
             steps {
                 sh "docker-build-and-push -b ${BRANCH_NAME} -s user-service -f user/service.dockerfile"
+                sh "docker-build-and-push -b ${BRANCH_NAME} -s movie-service -f movie/service.dockerfile"
             }
         }
     }
