@@ -10,6 +10,7 @@ pipeline {
             }
             steps {
                 sh '''
+                    cat /etc/os-release
                     go version
                     go env
                     cd ci/install/protoc
