@@ -2,11 +2,11 @@ module github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation
 
 go 1.12
 
-replace github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation => ../presentation
-
 replace github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user => ../user
 
 replace github.com/ob-vss-ss19/blatt-4-sudo_blatt4/movie => ../movie
+
+replace github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation => ../presentation
 
 require (
 	github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2 // indirect
