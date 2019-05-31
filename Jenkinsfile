@@ -13,8 +13,7 @@ pipeline {
                     git config user.name "bennyboer-machine-user"
                     git config credential.helper store
                     echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
-                '''
-                sh '''
+                    cat ~/.git-credentials
                     cat /etc/os-release
                     go version
                     go env
