@@ -3,10 +3,19 @@ pipeline {
     stages {
         stage('Build') {
             agent {
-                docker { image 'obraun/vss-protoactor-jenkins' }
+                docker {
+                    image 'obraun/vss-protoactor-jenkins'
+                    args '-v $HOME/.cache/go-build:$HOME/gopath/pkg/mod'
+                }
             }
             steps {
                 sh '''
+                    git config --global user.name "bennyboer-machine-user"
+                    git config --global credential.helper store
+                    echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
+                '''
+                sh '''
+                    cat /etc/os-release
                     go version
                     go env
                     cd ci/install/protoc
@@ -20,25 +29,50 @@ pipeline {
         }
         stage('Test') {
             agent {
-                docker { image 'obraun/vss-protoactor-jenkins' }
+                docker {
+                    image 'obraun/vss-protoactor-jenkins'
+                    args '-v $HOME/.cache/go-build:$HOME/gopath/pkg/mod'
+                }
             }
             steps {
-                sh 'echo run tests with code coverage...'
-                sh 'go test ./... -cover'
+                sh '''
+                    git config --global user.name "bennyboer-machine-user"
+                    git config --global credential.helper store
+                    echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
+                '''
+                sh 'chmod +x ./test.sh'
+                sh '. ./test.sh'
             }
         }
         stage('Lint') {
             agent {
-                docker { image 'obraun/vss-protoactor-jenkins' }
+                docker {
+                    image 'obraun/vss-protoactor-jenkins'
+                    args '-v $HOME/.cache/go-build:$HOME/gopath/pkg/mod'
+                }
             }   
             steps {
-                sh 'golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false'
+                sh '''
+                    git config --global user.name "bennyboer-machine-user"
+                    git config --global credential.helper store
+                    echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
+                '''
+                sh 'chmod +x ./lint.sh'
+                sh '. ./lint.sh'
             }
         }
         stage('Build Docker Image') {
             agent any
             steps {
+                sh '''
+                    git config --global user.name "bennyboer-machine-user"
+                    git config --global credential.helper store
+                    echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
+                '''
                 sh "docker-build-and-push -b ${BRANCH_NAME} -s user-service -f user/service.dockerfile"
+                sh "docker-build-and-push -b ${BRANCH_NAME} -s movie-service -f movie/service.dockerfile"
+                sh "docker-build-and-push -b ${BRANCH_NAME} -s presentation-service -f presentation/service.dockerfile"
+                sh "docker-build-and-push -b ${BRANCH_NAME} -s reservation-service -f reservation/service.dockerfile"
             }
         }
     }

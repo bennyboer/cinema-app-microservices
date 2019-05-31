@@ -1,11 +1,15 @@
-dist: xenial
-
+os: linux
 language: go
-
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
 go:
   - 1.12.x
-
-install:
+env:
+  - GO111MODULE=on
+install: true
+before_script:
   - PROTOBUF_VERSION=3.7.1
   - PROTOC_FILENAME=protoc-${PROTOBUF_VERSION}-linux-x86_64.zip
   - pushd /home/travis
@@ -14,14 +18,11 @@ install:
   - bin/protoc --version
   - popd
   - echo $PATH
-
-before_script:
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.16.0
-
 script:
-  - GO111MODULE=on
   - chmod +x ./build.sh
   - ./build.sh
-  - echo run tests...
-  - go test ./... -cover
-  - golangci-lint run --deadline 20m --enable-all --disable=goimports --disable=lll --disable=dupl --tests=false
+  - chmod +x ./test.sh
+  - ./test.sh
+  - chmod +x ./lint.sh
+  - ./lint.sh

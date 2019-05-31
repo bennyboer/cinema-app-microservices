@@ -2,14 +2,62 @@ syntax = "proto3";
 package proto;
 
 service User {
-    rpc Hello (HelloRequest) returns (HelloResponse) {
+    rpc Create (CreateRequest) returns (CreateResponse) {
+    }
+
+    rpc Read (ReadRequest) returns (ReadResponse) {
+    }
+
+    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
+    }
+
+    rpc Update (UpdateRequest) returns (UpdateResponse) {
+    }
+
+    rpc Delete (DeleteRequest) returns (DeleteResponse) {
     }
 }
 
-message HelloRequest {
+message UserData {
     string name = 1;
 }
 
-message HelloResponse {
-    string greeting = 2;
+message CreateRequest {
+    UserData data = 1;
+}
+
+message CreateResponse {
+    int64 createdId = 2;
+}
+
+message ReadRequest {
+    int64 id = 1;
+}
+
+message ReadResponse {
+    int64 id = 2;
+    UserData data = 3;
+}
+
+message ReadAllRequest {
+}
+
+message ReadAllResponse {
+    repeated int64 ids = 2;
+    repeated UserData dates = 3;
+}
+
+message UpdateRequest {
+    int64 id = 1;
+    UserData data = 2;
+}
+
+message UpdateResponse {
+}
+
+message DeleteRequest {
+    int64 id = 1;
+}
+
+message DeleteResponse {
 }

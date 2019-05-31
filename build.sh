@@ -1,11 +1,28 @@
 #!/bin/sh
-echo "Fetching dependencies..."
-go get
-go install github.com/micro/protoc-gen-micro
-go install github.com/golang/protobuf/protoc-gen-go
-
-echo "Compiling user service..."
+echo "Building user service..."
 chmod +x ./user/build.sh
 cd user
-. ./build.sh
+. ./build.sh "$1"
 cd ..
+
+echo "Building movie service..."
+chmod +x ./movie/build.sh
+cd movie
+. ./build.sh "$1"
+cd ..
+
+echo "Building presentation service..."
+chmod +x ./presentation/build.sh
+cd presentation
+. ./build.sh "$1"
+cd ..
+
+echo "Building reservation service..."
+chmod +x ./reservation/build.sh
+cd reservation
+. ./build.sh "$1"
+cd ..
+
+if [[ "$1" == "debug" ]]; then
+    read -n 1 -s -r -p "Press any key to continue"
+fi
