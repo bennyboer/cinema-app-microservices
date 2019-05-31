@@ -45,12 +45,12 @@ message SearchRequest {
 
 message SearchResponse {
     bool success = 3;
-    CinemaData = 4;
+    CinemaData data = 4;
 }
 
 message ListRequest {
 }
 
 message ListResponse {
-    repeated CinemaData = 5;
+    repeated CinemaData data = 5;
 }
