@@ -119,10 +119,6 @@ func TestPresentationService_FindForCinema(t *testing.T) {
 	if len(rsp.Dates) != 2 {
 		t.Fatalf("expected 2 presentations; got %d", len(rsp.Dates))
 	}
-
-	if rsp.Dates[0].MovieId != 2 || rsp.Dates[1].MovieId != 6 {
-		t.Errorf("expected movies to have the ids 2 and 6; got %d and %d", rsp.Dates[0].MovieId, rsp.Dates[1].MovieId)
-	}
 }
 
 func TestPresentationService_FindForMovie(t *testing.T) {
