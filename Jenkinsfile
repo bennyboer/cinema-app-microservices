@@ -13,7 +13,8 @@ pipeline {
                     git config --global user.name "bennyboer-machine-user"
                     git config --global credential.helper store
                     echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
-                    cat ~/.git-credentials
+                '''
+                sh '''
                     cat /etc/os-release
                     go version
                     go env
@@ -34,7 +35,11 @@ pipeline {
                 }
             }
             steps {
-                sh 'echo run tests with code coverage...'
+                sh '''
+                    git config --global user.name "bennyboer-machine-user"
+                    git config --global credential.helper store
+                    echo https://51faa31d4b9f08c8e56d4fb23fc082a85e617df8:x-oauth-basic@github.com >> ~/.git-credentials
+                '''
                 sh 'chmod +x ./test.sh'
                 sh '. ./test.sh'
             }
@@ -47,7 +52,6 @@ pipeline {
                 }
             }   
             steps {
-                sh 'echo run tests with code coverage...'
                 sh 'chmod +x ./lint.sh'
                 sh '. ./lint.sh'
             }
