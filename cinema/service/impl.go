@@ -39,9 +39,16 @@ func (handler *CinemaServiceHandler) Create(ctx context.Context, in *proto.Creat
 	}
 
 	handler.lastID++
-	data := proto.CinemaData{Name: in.Name, Id: handler.lastID}
+	seats := make([]*proto.SeatData, in.Seats*in.Row)
+
+	for i := int64(0); i < in.Row; i++ {
+		for j := int64(0); j < in.Seats; j++ {
+			seats[i*j+j] = &proto.SeatData{Row: i + 1, Seat: j + 1, Occupied: false}
+		}
+	}
+	data := proto.CinemaData{Name: in.Name, Id: handler.lastID, Seats: seats}
 	handler.cinemas[data.Id] = &data
-	out.Id = data.Id
+	out.Data = handler.cinemas[data.Id]
 
 	return nil
 }
@@ -50,7 +57,7 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 	handler.mux.Lock()
 	defer handler.mux.Unlock()
 
-	if _, ok := handler.cinemas[in.Id]; ok {
+	if _, ok := handler.cinemas[in.Id]; !ok {
 		return fmt.Errorf("sorry, cannot find cinema with %d", in.Id)
 	}
 
@@ -73,23 +80,48 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 	return nil
 }
 
-func (handler *CinemaServiceHandler) Search(ctx context.Context, in *proto.SearchRequest, out *proto.SearchResponse) error {
-	handler.mux.Lock()
-	defer handler.mux.Unlock()
+func (handler *CinemaServiceHandler) Read(ctx context.Context, in *proto.ReadRequest, out *proto.ReadResponse) error {
+	cinema, ok := handler.cinemas[in.Id]
 
-	if len(in.Name) == 0 {
-		return fmt.Errorf("cannot search for a cinema with an empty name")
+	if !ok {
+		out.Success = false
+		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+	}
+	out.Data = cinema
+	out.Success = true
+
+	return nil
+}
+
+func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.OccupiedRequest, out *proto.OccupiedResponse) error {
+	cinema, ok := handler.cinemas[in.Id]
+
+	if !ok {
+		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
 	}
 
-	out.Success = false
+	for _, seat := range in.Seats {
+		cinema.Seats[((seat.Row-1)*(seat.Seat-1))+seat.Seat-1].Occupied = true
+	}
+	handler.cinemas[in.Id] = cinema
 
-	for _, data := range handler.cinemas {
-		if data.Name == in.Name {
-			out.Data = data
-			out.Success = true
-		}
+	out.Seats = cinema.Seats
+	return nil
+}
+
+func (handler *CinemaServiceHandler) Free(ctx context.Context, in *proto.OccupiedRequest, out *proto.OccupiedResponse) error {
+	cinema, ok := handler.cinemas[in.Id]
+
+	if !ok {
+		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
 	}
 
+	for _, seat := range in.Seats {
+		cinema.Seats[((seat.Row-1)*(seat.Seat-1))+seat.Seat-1].Occupied = false
+	}
+	handler.cinemas[in.Id] = cinema
+
+	out.Seats = cinema.Seats
 	return nil
 }
 

@@ -10,16 +10,9 @@ type MockCinemaService struct{}
 
 func (s *MockCinemaService) Create(ctx context.Context, in *proto.CreateRequest, opts ...client.CallOption) (*proto.CreateResponse, error) {
 	return &proto.CreateResponse{
-		Id: 1,
-	}, nil
-}
-
-func (s *MockCinemaService) Search(ctx context.Context, in *proto.SearchRequest, opts ...client.CallOption) (*proto.SearchResponse, error) {
-	return &proto.SearchResponse{
-		Success: true,
 		Data: &proto.CinemaData{
-			Name: in.Name,
 			Id:   1,
+			Name: in.Name,
 		},
 	}, nil
 }
