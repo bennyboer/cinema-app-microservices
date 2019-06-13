@@ -1,5 +1,5 @@
 FROM obraun/vss-jenkins as builder
-COPY ./user /cinema-service-app
+COPY ./cinema /cinema-service-app
 WORKDIR /cinema-service-app
 RUN go build -o cinema-service main.go
 
