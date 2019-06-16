@@ -1,0 +1,82 @@
+syntax = "proto3";
+package proto;
+
+service Cinema {
+    rpc Create (CreateRequest) returns (CreateResponse) {
+    }
+
+    rpc Delete (DeleteRequest) returns (DeleteResponse) {
+    }
+
+    rpc Read (ReadRequest) returns (ReadResponse) {
+    }
+
+    rpc List (ListRequest) returns (ListResponse) {
+    }
+
+    rpc Occupy (OccupiedRequest) returns (OccupiedResponse) {
+    }
+
+    rpc Free (OccupiedRequest) returns (OccupiedResponse) {
+    }
+}
+
+message CinemaData {
+    // Name of the cinema.
+    string name = 1;
+
+    // Cinema Id
+    int64 id = 2;
+
+    // Data for occupation of seats
+    repeated SeatData seats = 3;
+}
+
+message SeatData {
+    int64 row = 4;
+    int64 seat = 5;
+    bool occupied = 6;
+}
+
+message CreateRequest {
+    string name = 1;
+    int64 row = 4;
+    int64 seats = 5;
+}
+
+message CreateResponse {
+    CinemaData data = 7;
+}
+
+message DeleteRequest {
+    int64 id = 2;
+}
+
+message DeleteResponse {
+    bool success = 8;
+}
+
+message ReadRequest {
+    int64 id = 2;
+}
+
+message ReadResponse {
+    bool success = 8;
+    CinemaData data = 7;
+}
+
+message ListRequest {
+}
+
+message ListResponse {
+    repeated CinemaData data = 9;
+}
+
+message OccupiedRequest {
+    int64 id = 2;
+    repeated SeatData seats = 10;
+}
+
+message OccupiedResponse {
+    repeated SeatData seats = 10;
+}
