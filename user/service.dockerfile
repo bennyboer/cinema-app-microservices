@@ -4,5 +4,5 @@ WORKDIR /apps
 RUN sh build.sh
 
 FROM iron/go
-EXPOSE 8091
+EXPOSE 8095
 ENTRYPOINT ["/apps/user/user-service"]

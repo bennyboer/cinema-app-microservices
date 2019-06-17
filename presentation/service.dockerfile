@@ -4,5 +4,5 @@ WORKDIR /apps
 RUN sh build.sh
 
 FROM iron/go
-EXPOSE 8094
+EXPOSE 8093
 ENTRYPOINT ["/apps/movie/presentation-service"]

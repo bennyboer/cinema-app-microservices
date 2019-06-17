@@ -4,5 +4,5 @@ WORKDIR /apps
 RUN sh build.sh
 
 FROM iron/go
-EXPOSE 8091
+EXPOSE 8092
 ENTRYPOINT ["/apps/movie/movie-service"]
