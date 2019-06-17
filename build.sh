@@ -5,6 +5,12 @@ cd user
 . ./build.sh "$1"
 cd ..
 
+echo "Building cinema service..."
+chmod +x ./cinema/build.sh
+cd cinema
+. ./build.sh "$1"
+cd ..
+
 echo "Building movie service..."
 chmod +x ./movie/build.sh
 cd movie

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	cinema "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/cinema/proto"
 	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
 	user "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user/proto"
@@ -22,6 +23,7 @@ type ReservationServiceHandler struct {
 type ReservationServiceDependencies struct {
 	PresentationService func() presentation.PresentationService
 	UserService         func() user.UserService
+	CinemaService       func() cinema.CinemaService
 }
 
 func NewReservationServiceHandler(dependencies *ReservationServiceDependencies) *ReservationServiceHandler {
@@ -57,11 +59,26 @@ func (h *ReservationServiceHandler) checkSeatsAvailable(context context.Context,
 		return false, err
 	}
 
-	fmt.Println(cinemaID)
-	fmt.Println(seats)
-	// TODO Ask cinema if seats are still available
+	// Convert seats to cinema seats
+	cinemaSeats := make([]*cinema.SeatData, 0, len(seats))
+	for _, seatPtr := range seats {
+		cinemaSeats = append(cinemaSeats, &cinema.SeatData{
+			Row:  seatPtr.Row,
+			Seat: seatPtr.Number,
+		})
+	}
 
-	return true, nil
+	cinemaService := h.getCinemaService()
+
+	rsp, err := cinemaService.AreAvailable(context, &cinema.AvailableRequest{
+		Id:    cinemaID,
+		Seats: cinemaSeats,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return rsp.Available, nil
 }
 
 // Try to mark the passed seats as available (or not if false is passed).
@@ -72,12 +89,32 @@ func (h *ReservationServiceHandler) markSeatsAsAvailable(context context.Context
 		return err
 	}
 
-	fmt.Println(cinemaID)
-	fmt.Println(available)
-	fmt.Println(seats)
-	// TODO Ask cinema to mark seats to be available or fail
+	// Convert seats to cinema seats
+	cinemaSeats := make([]*cinema.SeatData, 0, len(seats))
+	for _, seatPtr := range seats {
+		cinemaSeats = append(cinemaSeats, &cinema.SeatData{
+			Row:  seatPtr.Row,
+			Seat: seatPtr.Number,
+		})
+	}
 
-	return nil
+	cinemaService := h.getCinemaService()
+
+	if available {
+		// Free the seats
+		_, err = cinemaService.Free(context, &cinema.OccupiedRequest{
+			Id:    cinemaID,
+			Seats: cinemaSeats,
+		})
+	} else {
+		// Occupy the seats
+		_, err = cinemaService.Occupy(context, &cinema.OccupiedRequest{
+			Id:    cinemaID,
+			Seats: cinemaSeats,
+		})
+	}
+
+	return err
 }
 
 // Check if the passed user is available.
@@ -99,6 +136,11 @@ func (h *ReservationServiceHandler) getUserService() user.UserService {
 // Get an instance of the presentation service.
 func (h *ReservationServiceHandler) getPresentationService() presentation.PresentationService {
 	return h.dependencies.PresentationService()
+}
+
+// Get an instance of the cinema service.
+func (h *ReservationServiceHandler) getCinemaService() cinema.CinemaService {
+	return h.dependencies.CinemaService()
 }
 
 func (h *ReservationServiceHandler) Reserve(context context.Context, request *proto.ReservationRequest, response *proto.ReservationResponse) error {

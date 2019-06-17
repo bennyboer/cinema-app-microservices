@@ -81,6 +81,9 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 }
 
 func (handler *CinemaServiceHandler) Read(ctx context.Context, in *proto.ReadRequest, out *proto.ReadResponse) error {
+	handler.mux.RLock()
+	defer handler.mux.RUnlock()
+
 	cinema, ok := handler.cinemas[in.Id]
 
 	if !ok {
@@ -94,6 +97,9 @@ func (handler *CinemaServiceHandler) Read(ctx context.Context, in *proto.ReadReq
 }
 
 func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.OccupiedRequest, out *proto.OccupiedResponse) error {
+	handler.mux.Lock()
+	defer handler.mux.Unlock()
+
 	cinema, ok := handler.cinemas[in.Id]
 
 	if !ok {
@@ -110,6 +116,9 @@ func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.Occup
 }
 
 func (handler *CinemaServiceHandler) Free(ctx context.Context, in *proto.OccupiedRequest, out *proto.OccupiedResponse) error {
+	handler.mux.Lock()
+	defer handler.mux.Unlock()
+
 	cinema, ok := handler.cinemas[in.Id]
 
 	if !ok {
@@ -126,8 +135,8 @@ func (handler *CinemaServiceHandler) Free(ctx context.Context, in *proto.Occupie
 }
 
 func (handler *CinemaServiceHandler) List(ctx context.Context, in *proto.ListRequest, out *proto.ListResponse) error {
-	handler.mux.Lock()
-	defer handler.mux.Unlock()
+	handler.mux.RLock()
+	defer handler.mux.RUnlock()
 
 	size := len(handler.cinemas)
 	data := make([]*proto.CinemaData, 0, size)
@@ -136,6 +145,40 @@ func (handler *CinemaServiceHandler) List(ctx context.Context, in *proto.ListReq
 		data = append(data, cinema)
 	}
 	out.Data = data
+
+	return nil
+}
+
+func (handler *CinemaServiceHandler) AreAvailable(ctx context.Context, in *proto.AvailableRequest, out *proto.AvailableResponse) error {
+	handler.mux.RLock()
+	defer handler.mux.RUnlock()
+
+	cinema, ok := handler.cinemas[in.Id]
+
+	if !ok {
+		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+	}
+
+	available := true
+	for _, seatPtr := range cinema.Seats {
+		// Check if seat is to be checked
+		check := false
+		for _, sPtr := range in.Seats {
+			if seatPtr.Row == sPtr.Row && seatPtr.Seat == sPtr.Seat {
+				check = true
+				break
+			}
+		}
+
+		if check {
+			if seatPtr.Occupied {
+				available = false
+				break
+			}
+		}
+	}
+
+	out.Available = available
 
 	return nil
 }
