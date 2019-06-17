@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/micro/go-micro"
+	cinema "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/cinema/proto"
 	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
 	s "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/service"
@@ -25,6 +26,9 @@ func main() {
 			},
 			PresentationService: func() presentation.PresentationService {
 				return presentation.NewPresentationService("presentation-service", service.Client())
+			},
+			CinemaService: func() cinema.CinemaService {
+				return cinema.NewCinemaService("cinema-service", service.Client())
 			},
 		},
 	))

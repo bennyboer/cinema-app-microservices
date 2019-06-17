@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	cinema "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/cinema/proto"
+	cs "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/cinema/service"
 	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 	ps "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/service"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
@@ -18,6 +20,9 @@ func getHandler() *ReservationServiceHandler {
 			},
 			PresentationService: func() presentation.PresentationService {
 				return &ps.MockPresentationService{}
+			},
+			CinemaService: func() cinema.CinemaService {
+				return &cs.MockCinemaService{}
 			},
 		},
 	)

@@ -19,6 +19,9 @@ service Cinema {
 
     rpc Free (OccupiedRequest) returns (OccupiedResponse) {
     }
+
+    rpc AreAvailable (AvailableRequest) returns (AvailableResponse) {
+    }
 }
 
 message CinemaData {
@@ -79,4 +82,13 @@ message OccupiedRequest {
 
 message OccupiedResponse {
     repeated SeatData seats = 10;
+}
+
+message AvailableRequest {
+    int64 id = 2;
+    repeated SeatData seats = 10;
+}
+
+message AvailableResponse {
+    bool available = 1;
 }
