@@ -3,8 +3,9 @@
 
 # Generated executables
 /.exe
-user-service
-reservation-service
-presentation-service
-cinema-service
-movie-service
+/user/user-service
+/reservation/reservation-service
+/presentation/presentation-service
+/cinema/cinema-service
+/movie/movie-service
+/client/client
