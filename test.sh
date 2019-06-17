@@ -5,6 +5,12 @@ chmod +x ./test.sh
 . ./test.sh
 cd ..
 
+echo "Testing cinema service..."
+cd cinema
+chmod +x ./test.sh
+. ./test.sh
+cd ..
+
 echo "Testing movie service..."
 cd movie
 chmod +x ./test.sh

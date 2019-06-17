@@ -5,6 +5,12 @@ chmod +x ./lint.sh
 . ./lint.sh
 cd ..
 
+echo "Linting cinema service..."
+cd cinema
+chmod +x ./lint.sh
+. ./lint.sh
+cd ..
+
 echo "Linting movie service..."
 cd movie
 chmod +x ./lint.sh
