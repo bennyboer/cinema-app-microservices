@@ -151,14 +151,16 @@ func (h *PresentationServiceHandler) Delete(context context.Context, request *pr
 	}
 
 	h.mux.Lock()
-	defer h.mux.Unlock()
 
 	_, ok := h.presentations[request.Id]
 	if !ok {
+		h.mux.Unlock()
 		return fmt.Errorf("presentation could not be found")
 	}
 
 	delete(h.presentations, request.Id)
+
+	h.mux.Unlock()
 
 	// Notify reservation service that the presentation has been deleted -> Delete all related reservations
 	err := h.deleteRelatedReservations(context, request.Id)

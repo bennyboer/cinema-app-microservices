@@ -39,14 +39,14 @@ func (handler *CinemaServiceHandler) Create(ctx context.Context, in *proto.Creat
 	}
 
 	handler.lastID++
-	seats := make([]*proto.SeatData, in.Seats*in.Row)
+	seats := make([]*proto.SeatData, 0, in.Seats*in.Row)
 
 	for i := int64(0); i < in.Row; i++ {
 		for j := int64(0); j < in.Seats; j++ {
-			seats[i*j+j] = &proto.SeatData{Row: i + 1, Seat: j + 1, Occupied: false}
+			seats = append(seats, &proto.SeatData{Row: i + 1, Seat: j + 1, Occupied: false})
 		}
 	}
-	data := proto.CinemaData{Name: in.Name, Id: handler.lastID, Seats: seats}
+	data := proto.CinemaData{Name: in.Name, Id: handler.lastID, Seats: seats, RowCount: in.Row, SeatCount: in.Seats}
 	handler.cinemas[data.Id] = &data
 	out.Data = handler.cinemas[data.Id]
 
@@ -55,13 +55,15 @@ func (handler *CinemaServiceHandler) Create(ctx context.Context, in *proto.Creat
 
 func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.DeleteRequest, out *proto.DeleteResponse) error {
 	handler.mux.Lock()
-	defer handler.mux.Unlock()
 
 	if _, ok := handler.cinemas[in.Id]; !ok {
+		handler.mux.Unlock()
 		return fmt.Errorf("sorry, cannot find cinema with %d", in.Id)
 	}
 
 	delete(handler.cinemas, in.Id)
+
+	handler.mux.Unlock()
 
 	presentationService := handler.dependencies.PresentationService()
 
@@ -70,10 +72,10 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 		return fmt.Errorf("couldn't look up presentations for cinema")
 	}
 
-	for data := range toDelete.Ids {
+	for _, data := range toDelete.Ids {
 		_, err = presentationService.Delete(ctx, &presentation.DeleteRequest{Id: int64(data)})
 		if err != nil {
-			return fmt.Errorf("failed to delete presentation %d", data)
+			return fmt.Errorf("failed to delete presentation %d. Error: %s\n", data, err.Error())
 		}
 	}
 
@@ -107,7 +109,7 @@ func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.Occup
 	}
 
 	for _, seat := range in.Seats {
-		cinema.Seats[((seat.Row-1)*(seat.Seat-1))+seat.Seat-1].Occupied = true
+		cinema.Seats[((seat.Row-1)*cinema.SeatCount)+seat.Seat-1].Occupied = true
 	}
 	handler.cinemas[in.Id] = cinema
 
@@ -126,7 +128,7 @@ func (handler *CinemaServiceHandler) Free(ctx context.Context, in *proto.Occupie
 	}
 
 	for _, seat := range in.Seats {
-		cinema.Seats[((seat.Row-1)*(seat.Seat-1))+seat.Seat-1].Occupied = false
+		cinema.Seats[((seat.Row-1)*cinema.SeatCount)+seat.Seat-1].Occupied = false
 	}
 	handler.cinemas[in.Id] = cinema
 
