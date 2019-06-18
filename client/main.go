@@ -97,16 +97,16 @@ func setUpData(client client.Client) {
 			fmt.Printf("couldn't create reservation %d %s\n", i, err.Error())
 		} else {
 			fmt.Printf("Created reservation %v\n", reservationRsp)
-		}
 
-		resC, err := reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
-			Id: reservationRsp.CreatedId,
-		})
+			resC, err := reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
+				Id: reservationRsp.CreatedId,
+			})
 
-		if err != nil {
-			fmt.Printf("couldn't create reservation accept %d %s\n", i, err.Error())
-		} else {
-			fmt.Printf("Created accept %v\n", resC)
+			if err != nil {
+				fmt.Printf("couldn't create reservation accept %d %s\n", i, err.Error())
+			} else {
+				fmt.Printf("Created accept %v\n", resC)
+			}
 		}
 	}
 }
@@ -147,23 +147,23 @@ func deleteData(client client.Client) {
 	}
 	userList, _ = userService.ReadAll(context.TODO(), &user.ReadAllRequest{})
 
-	if len(userList.Ids) != 0 {
-		fmt.Printf("not all users deleted")
+	if userList.Ids != nil {
+		fmt.Println("not all users deleted")
 	}
 
 	movies, _ := movieService.ReadAll(context.TODO(), &movie.ReadAllRequest{})
-	if len(movies.Ids) != 0 {
-		fmt.Printf("Not all movies deleted")
+	if movies.Ids != nil {
+		fmt.Println("Not all movies deleted")
 	}
 
 	presentations, _ := presentationService.ReadAll(context.TODO(), &presentation.ReadAllRequest{})
-	if len(presentations.Ids) != 0 {
-		fmt.Printf("Not all movies deleted")
+	if presentations.Ids != nil {
+		fmt.Println("Not all presentations deleted")
 	}
 
 	reservations, _ := reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
 	if len(reservations.Ids) != 0 {
-		fmt.Printf("Not all movies deleted")
+		fmt.Println("Not all reservations deleted")
 	}
 
 }
@@ -233,11 +233,11 @@ func deleteTest(client client.Client) {
 	presentations, _ := presentationService.ReadAll(context.TODO(), &presentation.ReadAllRequest{})
 	reservations, _ := reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
 
-	if len(presentations.Ids) != 0 {
+	if presentations.Ids != nil {
 		println("Not all presentations were deleted!")
 	}
 
-	if len(reservations.Ids) != 0 {
+	if reservations.Ids != nil {
 		println("Not all reservations were deleted!")
 	}
 }
@@ -353,6 +353,6 @@ func main() {
 	service.Init()
 	setUpData(service.Client())
 	deleteData(service.Client())
-	//deleteTest(service.Client())
+	deleteTest(service.Client())
 	//reservationTest(service.Client())
 }
