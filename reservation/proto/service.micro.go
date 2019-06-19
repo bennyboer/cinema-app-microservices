@@ -40,6 +40,7 @@ type ReservationService interface {
 	CancelForPresentations(ctx context.Context, in *CancelForPresentationsRequest, opts ...client.CallOption) (*CancelForPresentationsResponse, error)
 	CancelForUsers(ctx context.Context, in *CancelForUsersRequest, opts ...client.CallOption) (*CancelForUsersResponse, error)
 	ReadAll(ctx context.Context, in *ReadAllRequest, opts ...client.CallOption) (*ReadAllResponse, error)
+	Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error)
 }
 
 type reservationService struct {
@@ -120,6 +121,16 @@ func (c *reservationService) ReadAll(ctx context.Context, in *ReadAllRequest, op
 	return out, nil
 }
 
+func (c *reservationService) Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error) {
+	req := c.c.NewRequest(c.name, "Reservation.Clear", in)
+	out := new(ClearResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Reservation service
 
 type ReservationHandler interface {
@@ -129,6 +140,7 @@ type ReservationHandler interface {
 	CancelForPresentations(context.Context, *CancelForPresentationsRequest, *CancelForPresentationsResponse) error
 	CancelForUsers(context.Context, *CancelForUsersRequest, *CancelForUsersResponse) error
 	ReadAll(context.Context, *ReadAllRequest, *ReadAllResponse) error
+	Clear(context.Context, *ClearRequest, *ClearResponse) error
 }
 
 func RegisterReservationHandler(s server.Server, hdlr ReservationHandler, opts ...server.HandlerOption) error {
@@ -139,6 +151,7 @@ func RegisterReservationHandler(s server.Server, hdlr ReservationHandler, opts .
 		CancelForPresentations(ctx context.Context, in *CancelForPresentationsRequest, out *CancelForPresentationsResponse) error
 		CancelForUsers(ctx context.Context, in *CancelForUsersRequest, out *CancelForUsersResponse) error
 		ReadAll(ctx context.Context, in *ReadAllRequest, out *ReadAllResponse) error
+		Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error
 	}
 	type Reservation struct {
 		reservation
@@ -173,4 +186,8 @@ func (h *reservationHandler) CancelForUsers(ctx context.Context, in *CancelForUs
 
 func (h *reservationHandler) ReadAll(ctx context.Context, in *ReadAllRequest, out *ReadAllResponse) error {
 	return h.ReservationHandler.ReadAll(ctx, in, out)
+}
+
+func (h *reservationHandler) Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error {
+	return h.ReservationHandler.Clear(ctx, in, out)
 }

@@ -16,6 +16,9 @@ service Movie {
 
     rpc Delete (DeleteRequest) returns (DeleteResponse) {
     }
+
+    rpc Clear (ClearRequest) returns (ClearResponse) {
+    }
 }
 
 message MovieData {
@@ -60,4 +63,10 @@ message DeleteRequest {
 }
 
 message DeleteResponse {
+}
+
+message ClearRequest {
+}
+
+message ClearResponse {
 }

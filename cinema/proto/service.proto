@@ -22,6 +22,9 @@ service Cinema {
 
     rpc AreAvailable (AvailableRequest) returns (AvailableResponse) {
     }
+
+    rpc Clear (ClearRequest) returns (ClearResponse) {
+    }
 }
 
 message CinemaData {
@@ -95,4 +98,10 @@ message AvailableRequest {
 
 message AvailableResponse {
     bool available = 1;
+}
+
+message ClearRequest {
+}
+
+message ClearResponse {
 }

@@ -311,7 +311,7 @@ func TestReservationService_CancelForUsers(t *testing.T) {
 				{Row: 1, Number: 1},
 			},
 		},
-	}, reservationRsp2)
+	}, reservationRsp3)
 
 	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
 		Id: reservationRsp3.CreatedId,
@@ -338,5 +338,71 @@ func TestReservationService_CancelForUsers(t *testing.T) {
 
 	if readRsp.Ids[0] != reservationRsp.CreatedId {
 		t.Errorf("expected the first reservation to be still there")
+	}
+}
+
+func TestReservationService_Clear(t *testing.T) {
+	handler := getHandler()
+
+	// Make some reservations first
+
+	reservationRsp := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         1,
+			PresentationId: 1,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	reservationRsp2 := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         2,
+			PresentationId: 1,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp2)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp2.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	reservationRsp3 := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         2,
+			PresentationId: 2,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp3)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp3.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	err := handler.Clear(context.TODO(), &proto.ClearRequest{}, &proto.ClearResponse{})
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	if len(readRsp.Ids) != 0 {
+		t.Errorf("expected service to have no more data; got %d dates", len(readRsp.Ids))
 	}
 }

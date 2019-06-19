@@ -218,3 +218,43 @@ func TestCinemaService_List(t *testing.T) {
 		t.Errorf("expected to list 3 cinemas; got %d", len(listRsp.Data))
 	}
 }
+
+func TestCinemaService_Clear(t *testing.T) {
+	handler := getHandler()
+
+	createRsp := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Name:  "Test 1",
+		Row:   4,
+		Seats: 4,
+	}, createRsp)
+
+	createRsp2 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Name:  "Test 2",
+		Row:   4,
+		Seats: 4,
+	}, createRsp2)
+
+	createRsp3 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Name:  "Test 3",
+		Row:   4,
+		Seats: 4,
+	}, createRsp3)
+
+	err := handler.Clear(context.TODO(), &proto.ClearRequest{}, &proto.ClearResponse{})
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	readRsp := &proto.ListResponse{}
+	err = handler.List(context.TODO(), &proto.ListRequest{}, readRsp)
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	if len(readRsp.Data) != 0 {
+		t.Errorf("expected service to have no more data; got %d dates", len(readRsp.Data))
+	}
+}

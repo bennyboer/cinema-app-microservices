@@ -42,3 +42,7 @@ func (s *MockReservationService) ReadAll(ctx context.Context, in *proto.ReadAllR
 		},
 	}, nil
 }
+
+func (s *MockReservationService) Clear(ctx context.Context, in *proto.ClearRequest, opts ...client.CallOption) (*proto.ClearResponse, error) {
+	return &proto.ClearResponse{}, nil
+}

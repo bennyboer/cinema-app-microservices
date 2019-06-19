@@ -39,6 +39,7 @@ type MovieService interface {
 	ReadAll(ctx context.Context, in *ReadAllRequest, opts ...client.CallOption) (*ReadAllResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UpdateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*DeleteResponse, error)
+	Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error)
 }
 
 type movieService struct {
@@ -109,6 +110,16 @@ func (c *movieService) Delete(ctx context.Context, in *DeleteRequest, opts ...cl
 	return out, nil
 }
 
+func (c *movieService) Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error) {
+	req := c.c.NewRequest(c.name, "Movie.Clear", in)
+	out := new(ClearResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Movie service
 
 type MovieHandler interface {
@@ -117,6 +128,7 @@ type MovieHandler interface {
 	ReadAll(context.Context, *ReadAllRequest, *ReadAllResponse) error
 	Update(context.Context, *UpdateRequest, *UpdateResponse) error
 	Delete(context.Context, *DeleteRequest, *DeleteResponse) error
+	Clear(context.Context, *ClearRequest, *ClearResponse) error
 }
 
 func RegisterMovieHandler(s server.Server, hdlr MovieHandler, opts ...server.HandlerOption) error {
@@ -126,6 +138,7 @@ func RegisterMovieHandler(s server.Server, hdlr MovieHandler, opts ...server.Han
 		ReadAll(ctx context.Context, in *ReadAllRequest, out *ReadAllResponse) error
 		Update(ctx context.Context, in *UpdateRequest, out *UpdateResponse) error
 		Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error
+		Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error
 	}
 	type Movie struct {
 		movie
@@ -156,4 +169,8 @@ func (h *movieHandler) Update(ctx context.Context, in *UpdateRequest, out *Updat
 
 func (h *movieHandler) Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error {
 	return h.MovieHandler.Delete(ctx, in, out)
+}
+
+func (h *movieHandler) Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error {
+	return h.MovieHandler.Clear(ctx, in, out)
 }

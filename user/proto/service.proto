@@ -16,6 +16,9 @@ service User {
 
     rpc Delete (DeleteRequest) returns (DeleteResponse) {
     }
+
+    rpc Clear (ClearRequest) returns (ClearResponse) {
+    }
 }
 
 message UserData {
@@ -60,4 +63,10 @@ message DeleteRequest {
 }
 
 message DeleteResponse {
+}
+
+message ClearRequest {
+}
+
+message ClearResponse {
 }

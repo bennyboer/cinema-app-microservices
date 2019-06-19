@@ -25,6 +25,9 @@ service Presentation {
 
     rpc DeleteForMovies (DeleteForMoviesRequest) returns (DeleteForMoviesResponse) {
     }
+
+    rpc Clear (ClearRequest) returns (ClearResponse) {
+    }
 }
 
 message PresentationData {
@@ -93,4 +96,10 @@ message DeleteForMoviesRequest {
 }
 
 message DeleteForMoviesResponse {
+}
+
+message ClearRequest {
+}
+
+message ClearResponse {
 }

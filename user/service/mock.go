@@ -42,3 +42,7 @@ func (s *MockUserService) Update(ctx context.Context, in *proto.UpdateRequest, o
 func (s *MockUserService) Delete(ctx context.Context, in *proto.DeleteRequest, opts ...client.CallOption) (*proto.DeleteResponse, error) {
 	return &proto.DeleteResponse{}, nil
 }
+
+func (s *MockUserService) Clear(ctx context.Context, in *proto.ClearRequest, opts ...client.CallOption) (*proto.ClearResponse, error) {
+	return &proto.ClearResponse{}, nil
+}

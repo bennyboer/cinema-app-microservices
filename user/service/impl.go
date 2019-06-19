@@ -148,6 +148,19 @@ func (h *UserServiceHandler) Delete(context context.Context, request *proto.Dele
 	return nil
 }
 
+func (h *UserServiceHandler) Clear(context.Context, *proto.ClearRequest, *proto.ClearResponse) error {
+	log.Printf("Clear | Clearing all service data...\n")
+
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
+	h.users = make(map[int64]*proto.UserData)
+	h.lastID = 0
+
+	log.Printf("Clear | Successfully cleared all service data\n")
+	return nil
+}
+
 // Delete all reservations related to the passed user ids.
 func (h *UserServiceHandler) deleteRelatedReservations(context context.Context, userIDs []int64) error {
 	reservationService := h.getReservationService()

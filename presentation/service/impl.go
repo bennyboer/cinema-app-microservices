@@ -213,8 +213,8 @@ func (h *PresentationServiceHandler) DeleteForCinemas(context context.Context, r
 
 	// Create lookup for cinema Ids
 	lp := make(map[int64]bool, len(request.CinemaIds))
-	for _, cinemaId := range request.CinemaIds {
-		lp[cinemaId] = true
+	for _, cinemaID := range request.CinemaIds {
+		lp[cinemaID] = true
 	}
 
 	h.mux.Lock()
@@ -246,8 +246,8 @@ func (h *PresentationServiceHandler) DeleteForMovies(context context.Context, re
 
 	// Create lookup for movie Ids
 	lp := make(map[int64]bool, len(request.MovieIds))
-	for _, movieId := range request.MovieIds {
-		lp[movieId] = true
+	for _, movieID := range request.MovieIds {
+		lp[movieID] = true
 	}
 
 	h.mux.Lock()
@@ -271,6 +271,19 @@ func (h *PresentationServiceHandler) DeleteForMovies(context context.Context, re
 	}
 
 	log.Printf("DeleteForMovies | Successfully deleted presentations for movie ids %v\n", request.MovieIds)
+	return nil
+}
+
+func (h *PresentationServiceHandler) Clear(context.Context, *proto.ClearRequest, *proto.ClearResponse) error {
+	log.Printf("Clear | Clearing all service data...\n")
+
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
+	h.presentations = make(map[int64]*proto.PresentationData)
+	h.lastID = 0
+
+	log.Printf("Clear | Successfully cleared all service data\n")
 	return nil
 }
 

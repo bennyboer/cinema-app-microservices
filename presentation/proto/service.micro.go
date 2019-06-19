@@ -42,6 +42,7 @@ type PresentationService interface {
 	Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*DeleteResponse, error)
 	DeleteForCinemas(ctx context.Context, in *DeleteForCinemasRequest, opts ...client.CallOption) (*DeleteForCinemasResponse, error)
 	DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, opts ...client.CallOption) (*DeleteForMoviesResponse, error)
+	Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error)
 }
 
 type presentationService struct {
@@ -142,6 +143,16 @@ func (c *presentationService) DeleteForMovies(ctx context.Context, in *DeleteFor
 	return out, nil
 }
 
+func (c *presentationService) Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error) {
+	req := c.c.NewRequest(c.name, "Presentation.Clear", in)
+	out := new(ClearResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Presentation service
 
 type PresentationHandler interface {
@@ -153,6 +164,7 @@ type PresentationHandler interface {
 	Delete(context.Context, *DeleteRequest, *DeleteResponse) error
 	DeleteForCinemas(context.Context, *DeleteForCinemasRequest, *DeleteForCinemasResponse) error
 	DeleteForMovies(context.Context, *DeleteForMoviesRequest, *DeleteForMoviesResponse) error
+	Clear(context.Context, *ClearRequest, *ClearResponse) error
 }
 
 func RegisterPresentationHandler(s server.Server, hdlr PresentationHandler, opts ...server.HandlerOption) error {
@@ -165,6 +177,7 @@ func RegisterPresentationHandler(s server.Server, hdlr PresentationHandler, opts
 		Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error
 		DeleteForCinemas(ctx context.Context, in *DeleteForCinemasRequest, out *DeleteForCinemasResponse) error
 		DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, out *DeleteForMoviesResponse) error
+		Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error
 	}
 	type Presentation struct {
 		presentation
@@ -207,4 +220,8 @@ func (h *presentationHandler) DeleteForCinemas(ctx context.Context, in *DeleteFo
 
 func (h *presentationHandler) DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, out *DeleteForMoviesResponse) error {
 	return h.PresentationHandler.DeleteForMovies(ctx, in, out)
+}
+
+func (h *presentationHandler) Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error {
+	return h.PresentationHandler.Clear(ctx, in, out)
 }

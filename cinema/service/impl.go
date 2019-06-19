@@ -238,3 +238,16 @@ func (handler *CinemaServiceHandler) AreAvailable(ctx context.Context, in *proto
 	log.Printf("AreAvailable | Successfully checked whether seats %v in cinema %d are available -> %s\n", in.Seats, in.Id, logMessage)
 	return nil
 }
+
+func (handler *CinemaServiceHandler) Clear(context.Context, *proto.ClearRequest, *proto.ClearResponse) error {
+	log.Printf("Clear | Clearing all service data...\n")
+
+	handler.mux.Lock()
+	defer handler.mux.Unlock()
+
+	handler.cinemas = make(map[int64]*proto.CinemaData)
+	handler.lastID = 0
+
+	log.Printf("Clear | Successfully cleared all service data\n")
+	return nil
+}

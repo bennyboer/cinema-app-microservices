@@ -39,6 +39,7 @@ type UserService interface {
 	ReadAll(ctx context.Context, in *ReadAllRequest, opts ...client.CallOption) (*ReadAllResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...client.CallOption) (*UpdateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*DeleteResponse, error)
+	Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error)
 }
 
 type userService struct {
@@ -109,6 +110,16 @@ func (c *userService) Delete(ctx context.Context, in *DeleteRequest, opts ...cli
 	return out, nil
 }
 
+func (c *userService) Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error) {
+	req := c.c.NewRequest(c.name, "User.Clear", in)
+	out := new(ClearResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for User service
 
 type UserHandler interface {
@@ -117,6 +128,7 @@ type UserHandler interface {
 	ReadAll(context.Context, *ReadAllRequest, *ReadAllResponse) error
 	Update(context.Context, *UpdateRequest, *UpdateResponse) error
 	Delete(context.Context, *DeleteRequest, *DeleteResponse) error
+	Clear(context.Context, *ClearRequest, *ClearResponse) error
 }
 
 func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.HandlerOption) error {
@@ -126,6 +138,7 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		ReadAll(ctx context.Context, in *ReadAllRequest, out *ReadAllResponse) error
 		Update(ctx context.Context, in *UpdateRequest, out *UpdateResponse) error
 		Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error
+		Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error
 	}
 	type User struct {
 		user
@@ -156,4 +169,8 @@ func (h *userHandler) Update(ctx context.Context, in *UpdateRequest, out *Update
 
 func (h *userHandler) Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error {
 	return h.UserHandler.Delete(ctx, in, out)
+}
+
+func (h *userHandler) Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error {
+	return h.UserHandler.Clear(ctx, in, out)
 }

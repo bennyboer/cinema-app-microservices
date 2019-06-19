@@ -41,6 +41,7 @@ type CinemaService interface {
 	Occupy(ctx context.Context, in *OccupiedRequest, opts ...client.CallOption) (*OccupiedResponse, error)
 	Free(ctx context.Context, in *OccupiedRequest, opts ...client.CallOption) (*OccupiedResponse, error)
 	AreAvailable(ctx context.Context, in *AvailableRequest, opts ...client.CallOption) (*AvailableResponse, error)
+	Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error)
 }
 
 type cinemaService struct {
@@ -131,6 +132,16 @@ func (c *cinemaService) AreAvailable(ctx context.Context, in *AvailableRequest, 
 	return out, nil
 }
 
+func (c *cinemaService) Clear(ctx context.Context, in *ClearRequest, opts ...client.CallOption) (*ClearResponse, error) {
+	req := c.c.NewRequest(c.name, "Cinema.Clear", in)
+	out := new(ClearResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Cinema service
 
 type CinemaHandler interface {
@@ -141,6 +152,7 @@ type CinemaHandler interface {
 	Occupy(context.Context, *OccupiedRequest, *OccupiedResponse) error
 	Free(context.Context, *OccupiedRequest, *OccupiedResponse) error
 	AreAvailable(context.Context, *AvailableRequest, *AvailableResponse) error
+	Clear(context.Context, *ClearRequest, *ClearResponse) error
 }
 
 func RegisterCinemaHandler(s server.Server, hdlr CinemaHandler, opts ...server.HandlerOption) error {
@@ -152,6 +164,7 @@ func RegisterCinemaHandler(s server.Server, hdlr CinemaHandler, opts ...server.H
 		Occupy(ctx context.Context, in *OccupiedRequest, out *OccupiedResponse) error
 		Free(ctx context.Context, in *OccupiedRequest, out *OccupiedResponse) error
 		AreAvailable(ctx context.Context, in *AvailableRequest, out *AvailableResponse) error
+		Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error
 	}
 	type Cinema struct {
 		cinema
@@ -190,4 +203,8 @@ func (h *cinemaHandler) Free(ctx context.Context, in *OccupiedRequest, out *Occu
 
 func (h *cinemaHandler) AreAvailable(ctx context.Context, in *AvailableRequest, out *AvailableResponse) error {
 	return h.CinemaHandler.AreAvailable(ctx, in, out)
+}
+
+func (h *cinemaHandler) Clear(ctx context.Context, in *ClearRequest, out *ClearResponse) error {
+	return h.CinemaHandler.Clear(ctx, in, out)
 }

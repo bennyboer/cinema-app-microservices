@@ -219,3 +219,40 @@ func TestMovieService_Delete_Unsuccessful(t *testing.T) {
 		t.Fatalf("expected delete request to be unsuccessful")
 	}
 }
+
+func TestMovieService_Clear(t *testing.T) {
+	handler := getHandler()
+
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.MovieData{
+			Title: "Inception",
+		},
+	}, &proto.CreateResponse{})
+
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.MovieData{
+			Title: "Lord of the Rings",
+		},
+	}, &proto.CreateResponse{})
+
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.MovieData{
+			Title: "Titanic",
+		},
+	}, &proto.CreateResponse{})
+
+	err := handler.Clear(context.TODO(), &proto.ClearRequest{}, &proto.ClearResponse{})
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	if len(readRsp.Ids) != 0 {
+		t.Errorf("expected service to have no more data; got %d dates", len(readRsp.Ids))
+	}
+}

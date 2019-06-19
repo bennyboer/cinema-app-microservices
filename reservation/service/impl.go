@@ -252,8 +252,8 @@ func (h *ReservationServiceHandler) CancelForPresentations(context context.Conte
 
 	// Create presentation id lookup
 	lp := make(map[int64]bool, len(request.PresentationIds))
-	for _, presentationId := range request.PresentationIds {
-		lp[presentationId] = true
+	for _, presentationID := range request.PresentationIds {
+		lp[presentationID] = true
 	}
 
 	h.mux.Lock()
@@ -282,8 +282,8 @@ func (h *ReservationServiceHandler) CancelForUsers(context context.Context, requ
 
 	// Create user id lookup
 	lp := make(map[int64]bool, len(request.UserIds))
-	for _, userId := range request.UserIds {
-		lp[userId] = true
+	for _, userID := range request.UserIds {
+		lp[userID] = true
 	}
 
 	h.mux.Lock()
@@ -328,5 +328,19 @@ func (h *ReservationServiceHandler) ReadAll(context context.Context, request *pr
 	response.Dates = dates
 
 	log.Printf("ReadAll | Successfully read %d reservations\n", len(response.Ids))
+	return nil
+}
+
+func (h *ReservationServiceHandler) Clear(context.Context, *proto.ClearRequest, *proto.ClearResponse) error {
+	log.Printf("Clear | Clearing all service data...\n")
+
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
+	h.reservations = make(map[int64]*proto.ReservationData)
+	h.toAccept = make(map[int64]bool)
+	h.lastID = 0
+
+	log.Printf("Clear | Successfully cleared all service data\n")
 	return nil
 }

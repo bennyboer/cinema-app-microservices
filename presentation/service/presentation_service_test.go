@@ -371,3 +371,46 @@ func TestPresentationService_DeleteForMovies(t *testing.T) {
 		t.Errorf("expected to have the first created presentation left")
 	}
 }
+
+func TestReservationService_Clear(t *testing.T) {
+	handler := getHandler()
+
+	createRsp := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 1,
+			MovieId:  2,
+		},
+	}, createRsp)
+
+	createRsp2 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 2,
+			MovieId:  54,
+		},
+	}, createRsp2)
+
+	createRsp3 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 6,
+			MovieId:  54,
+		},
+	}, createRsp3)
+
+	err := handler.Clear(context.TODO(), &proto.ClearRequest{}, &proto.ClearResponse{})
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Fatalf("expected no error; got %s", err.Error())
+	}
+
+	if len(readRsp.Ids) != 0 {
+		t.Errorf("expected service to have no more data; got %d dates", len(readRsp.Ids))
+	}
+}

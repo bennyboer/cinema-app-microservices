@@ -60,3 +60,7 @@ func (s *MockCinemaService) AreAvailable(ctx context.Context, in *proto.Availabl
 		Available: true,
 	}, nil
 }
+
+func (s *MockCinemaService) Clear(ctx context.Context, in *proto.ClearRequest, opts ...client.CallOption) (*proto.ClearResponse, error) {
+	return &proto.ClearResponse{}, nil
+}

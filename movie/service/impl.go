@@ -148,6 +148,19 @@ func (h *MovieServiceHandler) Delete(context context.Context, request *proto.Del
 	return nil
 }
 
+func (h *MovieServiceHandler) Clear(context.Context, *proto.ClearRequest, *proto.ClearResponse) error {
+	log.Printf("Clear | Clearing all service data...\n")
+
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
+	h.movies = make(map[int64]*proto.MovieData)
+	h.lastID = 0
+
+	log.Printf("Clear | Successfully cleared all service data\n")
+	return nil
+}
+
 // Cancel all presentations related to the passed movie ids.
 func (h *MovieServiceHandler) cancelRelatedPresentations(context context.Context, movieIDs []int64) error {
 	presentationService := h.getPresentationService()

@@ -19,6 +19,9 @@ service Reservation {
 
     rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
     }
+
+    rpc Clear (ClearRequest) returns (ClearResponse) {
+    }
 }
 
 message Seat {
@@ -75,4 +78,10 @@ message CancelForUsersRequest {
 }
 
 message CancelForUsersResponse {
+}
+
+message ClearRequest {
+}
+
+message ClearResponse {
 }

@@ -32,6 +32,7 @@ func NewClient(cl client.Client) *Client {
 }
 
 func (c *Client) setUpData(client client.Client) {
+	fmt.Println("Creating 2 cinemas...")
 	for i := 0; i < 2; i++ {
 		cinemaC, err := c.cinemaService.Create(context.TODO(), &cinema.CreateRequest{
 			Name:  fmt.Sprintf("Kino %d", i),
@@ -46,6 +47,7 @@ func (c *Client) setUpData(client client.Client) {
 		}
 	}
 
+	fmt.Println("Creating 4 users...")
 	for i := 0; i < 4; i++ {
 		userC, err := c.userService.Create(context.TODO(), &user.CreateRequest{
 			Data: &user.UserData{
@@ -60,6 +62,7 @@ func (c *Client) setUpData(client client.Client) {
 		}
 	}
 
+	fmt.Println("Creating 4 movies...")
 	for i := 0; i < 4; i++ {
 		movieC, err := c.movieService.Create(context.TODO(), &movie.CreateRequest{
 			Data: &movie.MovieData{
@@ -74,6 +77,7 @@ func (c *Client) setUpData(client client.Client) {
 		}
 	}
 
+	fmt.Println("Creating 4 presentations...")
 	for i := 0; i < 4; i++ {
 		presC, err := c.presentationService.Create(context.TODO(), &presentation.CreateRequest{
 			Data: &presentation.PresentationData{
@@ -89,6 +93,7 @@ func (c *Client) setUpData(client client.Client) {
 		}
 	}
 
+	fmt.Println("Creating 4 reservations...")
 	for i := 0; i < 4; i++ {
 		seats := make([]*reservation.Seat, 1)
 
@@ -171,7 +176,6 @@ func (c *Client) deleteData(client client.Client) {
 	if len(reservations.Ids) != 0 {
 		fmt.Println("Not all reservations deleted")
 	}
-
 }
 
 func (c *Client) deleteTest(client client.Client) {
