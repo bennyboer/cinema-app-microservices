@@ -1,0 +1,87 @@
+syntax = "proto3";
+package proto;
+
+service Reservation {
+    rpc Reserve (ReservationRequest) returns (ReservationResponse) {
+    }
+
+    rpc AcceptReservation (AcceptReservationRequest) returns (AcceptReservationResponse) {
+    }
+
+    rpc Cancel (CancelReservationRequest) returns (CancelReservationResponse) {
+    }
+
+    rpc CancelForPresentations (CancelForPresentationsRequest) returns (CancelForPresentationsResponse) {
+    }
+
+    rpc CancelForUsers (CancelForUsersRequest) returns (CancelForUsersResponse) {
+    }
+
+    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
+    }
+
+    rpc Clear (ClearRequest) returns (ClearResponse) {
+    }
+}
+
+message Seat {
+    int64 row = 1;
+    int64 number = 2;
+}
+
+message ReservationData {
+    int64 userId = 1;
+    int64 presentationId = 2;
+    repeated Seat seats = 3;
+}
+
+message ReservationRequest {
+    ReservationData data = 1;
+}
+
+message ReservationResponse {
+    bool available = 1;
+    int64 createdId = 2;
+}
+
+message AcceptReservationRequest {
+    int64 id = 1;
+}
+
+message AcceptReservationResponse {
+}
+
+message CancelReservationRequest {
+    int64 reservationId = 1;
+}
+
+message CancelReservationResponse {
+}
+
+message ReadAllRequest {
+}
+
+message ReadAllResponse {
+    repeated int64 ids = 1;
+    repeated ReservationData dates = 2;
+}
+
+message CancelForPresentationsRequest {
+    repeated int64 presentationIds = 1;
+}
+
+message CancelForPresentationsResponse {
+}
+
+message CancelForUsersRequest {
+    repeated int64 userIds = 1;
+}
+
+message CancelForUsersResponse {
+}
+
+message ClearRequest {
+}
+
+message ClearResponse {
+}

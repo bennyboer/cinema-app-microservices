@@ -1,2 +1,11 @@
-/.exe
+# IDE files
 .idea
+
+# Generated executables
+/.exe
+/user/user-service
+/reservation/reservation-service
+/presentation/presentation-service
+/cinema/cinema-service
+/movie/movie-service
+/client/client
