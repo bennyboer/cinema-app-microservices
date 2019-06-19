@@ -13,15 +13,27 @@ import (
 	"sync"
 )
 
-func setUpData(client client.Client) {
-	reservationService := reservation.NewReservationService("reservation-service", client)
-	presentationService := presentation.NewPresentationService("presentation-service", client)
-	movieService := movie.NewMovieService("movie-service", client)
-	userService := user.NewUserService("user-service", client)
-	cinemaService := cinema.NewCinemaService("cinema-service", client)
+type Client struct {
+	reservationService  reservation.ReservationService
+	presentationService presentation.PresentationService
+	movieService        movie.MovieService
+	userService         user.UserService
+	cinemaService       cinema.CinemaService
+}
 
+func NewClient(cl client.Client) *Client {
+	return &Client{
+		reservationService:  reservation.NewReservationService("reservation-service", cl),
+		presentationService: presentation.NewPresentationService("presentation-service", cl),
+		movieService:        movie.NewMovieService("movie-service", cl),
+		userService:         user.NewUserService("user-service", cl),
+		cinemaService:       cinema.NewCinemaService("cinema-service", cl),
+	}
+}
+
+func (c *Client) setUpData(client client.Client) {
 	for i := 0; i < 2; i++ {
-		cinemaC, err := cinemaService.Create(context.TODO(), &cinema.CreateRequest{
+		cinemaC, err := c.cinemaService.Create(context.TODO(), &cinema.CreateRequest{
 			Name:  fmt.Sprintf("Kino %d", i),
 			Seats: 4,
 			Row:   4,
@@ -35,7 +47,7 @@ func setUpData(client client.Client) {
 	}
 
 	for i := 0; i < 4; i++ {
-		userC, err := userService.Create(context.TODO(), &user.CreateRequest{
+		userC, err := c.userService.Create(context.TODO(), &user.CreateRequest{
 			Data: &user.UserData{
 				Name: fmt.Sprintf("User %d", i+1),
 			},
@@ -49,7 +61,7 @@ func setUpData(client client.Client) {
 	}
 
 	for i := 0; i < 4; i++ {
-		movieC, err := movieService.Create(context.TODO(), &movie.CreateRequest{
+		movieC, err := c.movieService.Create(context.TODO(), &movie.CreateRequest{
 			Data: &movie.MovieData{
 				Title: fmt.Sprintf("Film %d", i),
 			},
@@ -63,7 +75,7 @@ func setUpData(client client.Client) {
 	}
 
 	for i := 0; i < 4; i++ {
-		presC, err := presentationService.Create(context.TODO(), &presentation.CreateRequest{
+		presC, err := c.presentationService.Create(context.TODO(), &presentation.CreateRequest{
 			Data: &presentation.PresentationData{
 				MovieId:  int64(i),
 				CinemaId: int64(i%2 + 1),
@@ -85,7 +97,7 @@ func setUpData(client client.Client) {
 			Number: int64(i + 1),
 		}
 
-		reservationRsp, err := reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
+		reservationRsp, err := c.reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
 			Data: &reservation.ReservationData{
 				Seats:          seats,
 				PresentationId: int64(i + 1),
@@ -98,7 +110,7 @@ func setUpData(client client.Client) {
 		} else {
 			fmt.Printf("Created reservation %v\n", reservationRsp)
 
-			resC, err := reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
+			resC, err := c.reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
 				Id: reservationRsp.CreatedId,
 			})
 
@@ -111,17 +123,11 @@ func setUpData(client client.Client) {
 	}
 }
 
-func deleteData(client client.Client) {
-	reservationService := reservation.NewReservationService("reservation-service", client)
-	presentationService := presentation.NewPresentationService("presentation-service", client)
-	movieService := movie.NewMovieService("movie-service", client)
-	userService := user.NewUserService("user-service", client)
-	cinemaService := cinema.NewCinemaService("cinema-service", client)
-
-	cinemaList, _ := cinemaService.List(context.TODO(), &cinema.ListRequest{})
+func (c *Client) deleteData(client client.Client) {
+	cinemaList, _ := c.cinemaService.List(context.TODO(), &cinema.ListRequest{})
 
 	for _, data := range cinemaList.Data {
-		_, err := cinemaService.Delete(context.TODO(), &cinema.DeleteRequest{
+		_, err := c.cinemaService.Delete(context.TODO(), &cinema.DeleteRequest{
 			Id: data.Id,
 		})
 
@@ -130,14 +136,14 @@ func deleteData(client client.Client) {
 		}
 	}
 
-	cinemaList, _ = cinemaService.List(context.TODO(), &cinema.ListRequest{})
+	cinemaList, _ = c.cinemaService.List(context.TODO(), &cinema.ListRequest{})
 	if len(cinemaList.Data) != 0 {
 		fmt.Printf("not all cinemas deleted")
 	}
 
-	userList, _ := userService.ReadAll(context.TODO(), &user.ReadAllRequest{})
+	userList, _ := c.userService.ReadAll(context.TODO(), &user.ReadAllRequest{})
 	for _, data := range userList.Ids {
-		_, err := userService.Delete(context.TODO(), &user.DeleteRequest{
+		_, err := c.userService.Delete(context.TODO(), &user.DeleteRequest{
 			Id: data,
 		})
 
@@ -145,37 +151,31 @@ func deleteData(client client.Client) {
 			fmt.Printf("error deleting user %d %s\n", data, err.Error())
 		}
 	}
-	userList, _ = userService.ReadAll(context.TODO(), &user.ReadAllRequest{})
+	userList, _ = c.userService.ReadAll(context.TODO(), &user.ReadAllRequest{})
 
 	if userList.Ids != nil {
 		fmt.Println("not all users deleted")
 	}
 
-	movies, _ := movieService.ReadAll(context.TODO(), &movie.ReadAllRequest{})
+	movies, _ := c.movieService.ReadAll(context.TODO(), &movie.ReadAllRequest{})
 	if movies.Ids != nil {
 		fmt.Println("Not all movies deleted")
 	}
 
-	presentations, _ := presentationService.ReadAll(context.TODO(), &presentation.ReadAllRequest{})
+	presentations, _ := c.presentationService.ReadAll(context.TODO(), &presentation.ReadAllRequest{})
 	if presentations.Ids != nil {
 		fmt.Println("Not all presentations deleted")
 	}
 
-	reservations, _ := reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
+	reservations, _ := c.reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
 	if len(reservations.Ids) != 0 {
 		fmt.Println("Not all reservations deleted")
 	}
 
 }
 
-func deleteTest(client client.Client) {
-	reservationService := reservation.NewReservationService("reservation-service", client)
-	presentationService := presentation.NewPresentationService("presentation-service", client)
-	movieService := movie.NewMovieService("movie-service", client)
-	userService := user.NewUserService("user-service", client)
-	cinemaService := cinema.NewCinemaService("cinema-service", client)
-
-	cinemaCreate, err := cinemaService.Create(context.TODO(), &cinema.CreateRequest{
+func (c *Client) deleteTest(client client.Client) {
+	cinemaCreate, err := c.cinemaService.Create(context.TODO(), &cinema.CreateRequest{
 		Name:  "Test-Kino",
 		Seats: 10,
 		Row:   2,
@@ -186,19 +186,19 @@ func deleteTest(client client.Client) {
 		fmt.Printf("Created cinema : %v\n", cinemaCreate)
 	}
 
-	userCreate, _ := userService.Create(context.TODO(), &user.CreateRequest{
+	userCreate, _ := c.userService.Create(context.TODO(), &user.CreateRequest{
 		Data: &user.UserData{
 			Name: "Herbert",
 		},
 	})
 
-	movieCreate, _ := movieService.Create(context.TODO(), &movie.CreateRequest{
+	movieCreate, _ := c.movieService.Create(context.TODO(), &movie.CreateRequest{
 		Data: &movie.MovieData{
 			Title: "Der große Günther",
 		},
 	})
 
-	presentationCreate, _ := presentationService.Create(context.TODO(), &presentation.CreateRequest{
+	presentationCreate, _ := c.presentationService.Create(context.TODO(), &presentation.CreateRequest{
 		Data: &presentation.PresentationData{
 			CinemaId: cinemaCreate.Data.Id,
 			MovieId:  movieCreate.CreatedId,
@@ -211,7 +211,7 @@ func deleteTest(client client.Client) {
 		Number: 1,
 	}
 
-	reservationRsp, _ := reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
+	reservationRsp, _ := c.reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
 		Data: &reservation.ReservationData{
 			Seats:          seats,
 			PresentationId: presentationCreate.CreatedId,
@@ -219,19 +219,19 @@ func deleteTest(client client.Client) {
 		},
 	})
 
-	_, _ = reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
+	_, _ = c.reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
 		Id: reservationRsp.CreatedId,
 	})
 
-	_, err = cinemaService.Delete(context.TODO(), &cinema.DeleteRequest{
+	_, err = c.cinemaService.Delete(context.TODO(), &cinema.DeleteRequest{
 		Id: cinemaCreate.Data.Id,
 	})
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	presentations, _ := presentationService.ReadAll(context.TODO(), &presentation.ReadAllRequest{})
-	reservations, _ := reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
+	presentations, _ := c.presentationService.ReadAll(context.TODO(), &presentation.ReadAllRequest{})
+	reservations, _ := c.reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
 
 	if presentations.Ids != nil {
 		println("Not all presentations were deleted!")
@@ -242,38 +242,32 @@ func deleteTest(client client.Client) {
 	}
 }
 
-func reservationTest(client client.Client) {
-	reservationService := reservation.NewReservationService("reservation-service", client)
-	presentationService := presentation.NewPresentationService("presentation-service", client)
-	movieService := movie.NewMovieService("movie-service", client)
-	userService := user.NewUserService("user-service", client)
-	cinemaService := cinema.NewCinemaService("cinema-service", client)
-
-	cinemaCreate, _ := cinemaService.Create(context.TODO(), &cinema.CreateRequest{
+func (c *Client) reservationTest(client client.Client) {
+	cinemaCreate, _ := c.cinemaService.Create(context.TODO(), &cinema.CreateRequest{
 		Name:  "Test-Kino",
 		Seats: 10,
 		Row:   2,
 	})
 
-	user1, _ := userService.Create(context.TODO(), &user.CreateRequest{
+	user1, _ := c.userService.Create(context.TODO(), &user.CreateRequest{
 		Data: &user.UserData{
 			Name: "Herbert",
 		},
 	})
 
-	user2, _ := userService.Create(context.TODO(), &user.CreateRequest{
+	user2, _ := c.userService.Create(context.TODO(), &user.CreateRequest{
 		Data: &user.UserData{
 			Name: "Günther",
 		},
 	})
 
-	movieCreate, _ := movieService.Create(context.TODO(), &movie.CreateRequest{
+	movieCreate, _ := c.movieService.Create(context.TODO(), &movie.CreateRequest{
 		Data: &movie.MovieData{
 			Title: "Der große Günther",
 		},
 	})
 
-	presentationCreate, _ := presentationService.Create(context.TODO(), &presentation.CreateRequest{
+	presentationCreate, _ := c.presentationService.Create(context.TODO(), &presentation.CreateRequest{
 		Data: &presentation.PresentationData{
 			CinemaId: cinemaCreate.Data.Id,
 			MovieId:  movieCreate.CreatedId,
@@ -294,7 +288,7 @@ func reservationTest(client client.Client) {
 	go func() {
 		barrier.Wait()
 
-		rsp, _ := reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
+		rsp, _ := c.reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
 			Data: &reservation.ReservationData{
 				Seats:          seats,
 				PresentationId: presentationCreate.CreatedId,
@@ -303,7 +297,7 @@ func reservationTest(client client.Client) {
 		})
 		fmt.Printf("1 | Reserve response: %v\n", rsp)
 
-		acceptRsp, err := reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
+		acceptRsp, err := c.reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
 			Id: rsp.CreatedId,
 		})
 		fmt.Printf("1 | Accept response: %v\n", acceptRsp)
@@ -318,7 +312,7 @@ func reservationTest(client client.Client) {
 	go func() {
 		barrier.Wait()
 
-		rsp, _ := reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
+		rsp, _ := c.reservationService.Reserve(context.TODO(), &reservation.ReservationRequest{
 			Data: &reservation.ReservationData{
 				Seats:          seats,
 				PresentationId: presentationCreate.CreatedId,
@@ -327,7 +321,7 @@ func reservationTest(client client.Client) {
 		})
 		fmt.Printf("2 | Reserve response: %v\n", rsp)
 
-		acceptRsp, err := reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
+		acceptRsp, err := c.reservationService.AcceptReservation(context.TODO(), &reservation.AcceptReservationRequest{
 			Id: rsp.CreatedId,
 		})
 		fmt.Printf("2 | Accept response: %v\n", acceptRsp)
@@ -342,17 +336,23 @@ func reservationTest(client client.Client) {
 	barrier.Done()
 	wg.Wait()
 
-	reservations, _ := reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
+	reservations, _ := c.reservationService.ReadAll(context.TODO(), &reservation.ReadAllRequest{})
 
 	println("User ", reservations.Dates[0].UserId, " got the reservation")
 }
 
 func main() {
 	service := micro.NewService()
-
 	service.Init()
-	setUpData(service.Client())
-	deleteData(service.Client())
-	deleteTest(service.Client())
-	//reservationTest(service.Client())
+
+	testClient := NewClient(service.Client())
+
+	testClient.setUpData(service.Client())
+
+	// TESTS BEGIN
+	testClient.deleteTest(service.Client())
+	testClient.reservationTest(service.Client())
+	// TESTS END
+
+	testClient.deleteData(service.Client())
 }
