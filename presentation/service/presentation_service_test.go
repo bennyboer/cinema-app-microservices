@@ -271,3 +271,103 @@ func TestPresentationService_Delete_NotExistent(t *testing.T) {
 		t.Errorf("expected error because of non-existent presentation")
 	}
 }
+
+func TestPresentationService_DeleteForCinemas(t *testing.T) {
+	handler := getHandler()
+
+	createRsp := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 1,
+			MovieId:  2,
+		},
+	}, createRsp)
+
+	createRsp2 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 2,
+			MovieId:  54,
+		},
+	}, createRsp2)
+
+	createRsp3 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 2,
+			MovieId:  43,
+		},
+	}, createRsp3)
+
+	err := handler.DeleteForCinemas(context.TODO(), &proto.DeleteForCinemasRequest{
+		CinemaIds: []int64{2},
+	}, &proto.DeleteForCinemasResponse{})
+
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	if len(readRsp.Ids) != 1 {
+		t.Errorf("expected to have only one presentation left")
+	}
+
+	if readRsp.Ids[0] != createRsp.CreatedId {
+		t.Errorf("expected to have the first created presentation left")
+	}
+}
+
+func TestPresentationService_DeleteForMovies(t *testing.T) {
+	handler := getHandler()
+
+	createRsp := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 1,
+			MovieId:  2,
+		},
+	}, createRsp)
+
+	createRsp2 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 2,
+			MovieId:  54,
+		},
+	}, createRsp2)
+
+	createRsp3 := &proto.CreateResponse{}
+	_ = handler.Create(context.TODO(), &proto.CreateRequest{
+		Data: &proto.PresentationData{
+			CinemaId: 6,
+			MovieId:  54,
+		},
+	}, createRsp3)
+
+	err := handler.DeleteForMovies(context.TODO(), &proto.DeleteForMoviesRequest{
+		MovieIds: []int64{54},
+	}, &proto.DeleteForMoviesResponse{})
+
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	if len(readRsp.Ids) != 1 {
+		t.Errorf("expected to have only one presentation left")
+	}
+
+	if readRsp.Ids[0] != createRsp.CreatedId {
+		t.Errorf("expected to have the first created presentation left")
+	}
+}

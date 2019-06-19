@@ -74,6 +74,8 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 
 	handler.mux.Lock()
 
+	out.Success = false
+
 	if _, ok := handler.cinemas[in.Id]; !ok {
 		handler.mux.Unlock()
 
@@ -95,6 +97,8 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 		log.Printf("Delete | ERROR -> %s\n", err2.Error())
 		return err2
 	}
+
+	out.Success = true
 
 	log.Printf("Delete | Successfully deleted cinema with id %d\n", in.Id)
 	return nil

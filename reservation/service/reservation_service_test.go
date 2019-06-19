@@ -192,3 +192,151 @@ func TestReservationService_CancelReservation_NotAvailable(t *testing.T) {
 		t.Errorf("expected error because of missing reservation")
 	}
 }
+
+func TestReservationService_CancelForPresentations(t *testing.T) {
+	handler := getHandler()
+
+	// Make some reservations first
+
+	reservationRsp := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         1,
+			PresentationId: 1,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	reservationRsp2 := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         1,
+			PresentationId: 2,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp2)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp2.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	reservationRsp3 := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         1,
+			PresentationId: 2,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp2)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp3.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	err := handler.CancelForPresentations(context.TODO(), &proto.CancelForPresentationsRequest{
+		PresentationIds: []int64{2},
+	}, &proto.CancelForPresentationsResponse{})
+
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	// Check that the reservation 1 is still there
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	if len(readRsp.Ids) != 1 {
+		t.Errorf("expected to have exactly one reservation left")
+	}
+
+	if readRsp.Ids[0] != reservationRsp.CreatedId {
+		t.Errorf("expected the first reservation to be still there")
+	}
+}
+
+func TestReservationService_CancelForUsers(t *testing.T) {
+	handler := getHandler()
+
+	// Make some reservations first
+
+	reservationRsp := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         1,
+			PresentationId: 1,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	reservationRsp2 := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         2,
+			PresentationId: 1,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp2)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp2.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	reservationRsp3 := &proto.ReservationResponse{}
+	_ = handler.Reserve(context.TODO(), &proto.ReservationRequest{
+		Data: &proto.ReservationData{
+			UserId:         2,
+			PresentationId: 2,
+			Seats: []*proto.Seat{
+				{Row: 1, Number: 1},
+			},
+		},
+	}, reservationRsp2)
+
+	_ = handler.AcceptReservation(context.TODO(), &proto.AcceptReservationRequest{
+		Id: reservationRsp3.CreatedId,
+	}, &proto.AcceptReservationResponse{})
+
+	err := handler.CancelForUsers(context.TODO(), &proto.CancelForUsersRequest{
+		UserIds: []int64{2},
+	}, &proto.CancelForUsersResponse{})
+
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	// Check that the reservation 1 is still there
+	readRsp := &proto.ReadAllResponse{}
+	err = handler.ReadAll(context.TODO(), &proto.ReadAllRequest{}, readRsp)
+	if err != nil {
+		t.Errorf("expected no error")
+	}
+
+	if len(readRsp.Ids) != 1 {
+		t.Errorf("expected to have exactly one reservation left")
+	}
+
+	if readRsp.Ids[0] != reservationRsp.CreatedId {
+		t.Errorf("expected the first reservation to be still there")
+	}
+}
