@@ -19,6 +19,12 @@ service Presentation {
 
     rpc Delete (DeleteRequest) returns (DeleteResponse) {
     }
+
+    rpc DeleteForCinemas (DeleteForCinemasRequest) returns (DeleteForCinemasResponse) {
+    }
+
+    rpc DeleteForMovies (DeleteForMoviesRequest) returns (DeleteForMoviesResponse) {
+    }
 }
 
 message PresentationData {
@@ -73,4 +79,18 @@ message DeleteRequest {
 }
 
 message DeleteResponse {
+}
+
+message DeleteForCinemasRequest {
+    repeated int64 cinemaIds = 1;
+}
+
+message DeleteForCinemasResponse {
+}
+
+message DeleteForMoviesRequest {
+    repeated int64 movieIds = 1;
+}
+
+message DeleteForMoviesResponse {
 }

@@ -11,6 +11,12 @@ service Reservation {
     rpc Cancel (CancelReservationRequest) returns (CancelReservationResponse) {
     }
 
+    rpc CancelForPresentations (CancelForPresentationsRequest) returns (CancelForPresentationsResponse) {
+    }
+
+    rpc CancelForUsers (CancelForUsersRequest) returns (CancelForUsersResponse) {
+    }
+
     rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
     }
 }
@@ -55,4 +61,18 @@ message ReadAllRequest {
 message ReadAllResponse {
     repeated int64 ids = 1;
     repeated ReservationData dates = 2;
+}
+
+message CancelForPresentationsRequest {
+    repeated int64 presentationIds = 1;
+}
+
+message CancelForPresentationsResponse {
+}
+
+message CancelForUsersRequest {
+    repeated int64 userIds = 1;
+}
+
+message CancelForUsersResponse {
 }

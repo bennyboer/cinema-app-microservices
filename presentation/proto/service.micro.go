@@ -40,6 +40,8 @@ type PresentationService interface {
 	Read(ctx context.Context, in *ReadRequest, opts ...client.CallOption) (*ReadResponse, error)
 	ReadAll(ctx context.Context, in *ReadAllRequest, opts ...client.CallOption) (*ReadAllResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*DeleteResponse, error)
+	DeleteForCinemas(ctx context.Context, in *DeleteForCinemasRequest, opts ...client.CallOption) (*DeleteForCinemasResponse, error)
+	DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, opts ...client.CallOption) (*DeleteForMoviesResponse, error)
 }
 
 type presentationService struct {
@@ -120,6 +122,26 @@ func (c *presentationService) Delete(ctx context.Context, in *DeleteRequest, opt
 	return out, nil
 }
 
+func (c *presentationService) DeleteForCinemas(ctx context.Context, in *DeleteForCinemasRequest, opts ...client.CallOption) (*DeleteForCinemasResponse, error) {
+	req := c.c.NewRequest(c.name, "Presentation.DeleteForCinemas", in)
+	out := new(DeleteForCinemasResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *presentationService) DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, opts ...client.CallOption) (*DeleteForMoviesResponse, error) {
+	req := c.c.NewRequest(c.name, "Presentation.DeleteForMovies", in)
+	out := new(DeleteForMoviesResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Presentation service
 
 type PresentationHandler interface {
@@ -129,6 +151,8 @@ type PresentationHandler interface {
 	Read(context.Context, *ReadRequest, *ReadResponse) error
 	ReadAll(context.Context, *ReadAllRequest, *ReadAllResponse) error
 	Delete(context.Context, *DeleteRequest, *DeleteResponse) error
+	DeleteForCinemas(context.Context, *DeleteForCinemasRequest, *DeleteForCinemasResponse) error
+	DeleteForMovies(context.Context, *DeleteForMoviesRequest, *DeleteForMoviesResponse) error
 }
 
 func RegisterPresentationHandler(s server.Server, hdlr PresentationHandler, opts ...server.HandlerOption) error {
@@ -139,6 +163,8 @@ func RegisterPresentationHandler(s server.Server, hdlr PresentationHandler, opts
 		Read(ctx context.Context, in *ReadRequest, out *ReadResponse) error
 		ReadAll(ctx context.Context, in *ReadAllRequest, out *ReadAllResponse) error
 		Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error
+		DeleteForCinemas(ctx context.Context, in *DeleteForCinemasRequest, out *DeleteForCinemasResponse) error
+		DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, out *DeleteForMoviesResponse) error
 	}
 	type Presentation struct {
 		presentation
@@ -173,4 +199,12 @@ func (h *presentationHandler) ReadAll(ctx context.Context, in *ReadAllRequest, o
 
 func (h *presentationHandler) Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error {
 	return h.PresentationHandler.Delete(ctx, in, out)
+}
+
+func (h *presentationHandler) DeleteForCinemas(ctx context.Context, in *DeleteForCinemasRequest, out *DeleteForCinemasResponse) error {
+	return h.PresentationHandler.DeleteForCinemas(ctx, in, out)
+}
+
+func (h *presentationHandler) DeleteForMovies(ctx context.Context, in *DeleteForMoviesRequest, out *DeleteForMoviesResponse) error {
+	return h.PresentationHandler.DeleteForMovies(ctx, in, out)
 }

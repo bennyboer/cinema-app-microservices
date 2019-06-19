@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/cinema/proto"
 	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
+	"log"
 	"sync"
 )
 
@@ -31,34 +32,54 @@ func NewCinemaServiceHandler(dependencies *CinemaServiceDependencies) *CinemaSer
 }
 
 func (handler *CinemaServiceHandler) Create(ctx context.Context, in *proto.CreateRequest, out *proto.CreateResponse) error {
+	log.Printf("Create | Creating cinema with name %s, %d rows and %d seats\n", in.Name, in.Row, in.Seats)
+
 	handler.mux.Lock()
 	defer handler.mux.Unlock()
 
 	if len(in.Name) == 0 {
-		return fmt.Errorf("cannot create a cinema with an empty name")
+		err := fmt.Errorf("cannot create a cinema with an empty name")
+		log.Printf("Create | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	handler.lastID++
-	seats := make([]*proto.SeatData, 0, in.Seats*in.Row)
 
+	// Create seats
+	seatCount := in.Seats * in.Row
+	seats := make([]*proto.SeatData, 0, seatCount)
 	for i := int64(0); i < in.Row; i++ {
 		for j := int64(0); j < in.Seats; j++ {
 			seats = append(seats, &proto.SeatData{Row: i + 1, Seat: j + 1, Occupied: false})
 		}
 	}
-	data := proto.CinemaData{Name: in.Name, Id: handler.lastID, Seats: seats, RowCount: in.Row, SeatCount: in.Seats}
+
+	data := proto.CinemaData{
+		Name:      in.Name,
+		Id:        handler.lastID,
+		Seats:     seats,
+		RowCount:  in.Row,
+		SeatCount: in.Seats,
+	}
+
 	handler.cinemas[data.Id] = &data
 	out.Data = handler.cinemas[data.Id]
 
+	log.Printf("Create | Successfully created cinema with id %d\n", data.Id)
 	return nil
 }
 
 func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.DeleteRequest, out *proto.DeleteResponse) error {
+	log.Printf("Delete | Deleting cinema with id %d\n", in.Id)
+
 	handler.mux.Lock()
 
 	if _, ok := handler.cinemas[in.Id]; !ok {
 		handler.mux.Unlock()
-		return fmt.Errorf("sorry, cannot find cinema with %d", in.Id)
+
+		err := fmt.Errorf("sorry, cannot find cinema with %d", in.Id)
+		log.Printf("Delete | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	delete(handler.cinemas, in.Id)
@@ -66,23 +87,22 @@ func (handler *CinemaServiceHandler) Delete(ctx context.Context, in *proto.Delet
 	handler.mux.Unlock()
 
 	presentationService := handler.dependencies.PresentationService()
-
-	toDelete, err := presentationService.FindForCinema(ctx, &presentation.FindForCinemaRequest{CinemaId: in.Id})
+	_, err := presentationService.DeleteForCinemas(ctx, &presentation.DeleteForCinemasRequest{
+		CinemaIds: []int64{in.Id},
+	})
 	if err != nil {
-		return fmt.Errorf("couldn't look up presentations for cinema")
+		err2 := fmt.Errorf("failed to delete presentations for cinema id %d. Error:\n%s", in.Id, err.Error())
+		log.Printf("Delete | ERROR -> %s\n", err2.Error())
+		return err2
 	}
 
-	for _, data := range toDelete.Ids {
-		_, err = presentationService.Delete(ctx, &presentation.DeleteRequest{Id: int64(data)})
-		if err != nil {
-			return fmt.Errorf("failed to delete presentation %d. Error: %s\n", data, err.Error())
-		}
-	}
-
+	log.Printf("Delete | Successfully deleted cinema with id %d\n", in.Id)
 	return nil
 }
 
 func (handler *CinemaServiceHandler) Read(ctx context.Context, in *proto.ReadRequest, out *proto.ReadResponse) error {
+	log.Printf("Read | Reading cinema with id %d\n", in.Id)
+
 	handler.mux.RLock()
 	defer handler.mux.RUnlock()
 
@@ -90,22 +110,30 @@ func (handler *CinemaServiceHandler) Read(ctx context.Context, in *proto.ReadReq
 
 	if !ok {
 		out.Success = false
-		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+
+		err := fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		log.Printf("Read | ERROR -> %s\n", err.Error())
+		return err
 	}
 	out.Data = cinema
 	out.Success = true
 
+	log.Printf("Read | Successfully read cinema with id %d\n", in.Id)
 	return nil
 }
 
 func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.OccupiedRequest, out *proto.OccupiedResponse) error {
+	log.Printf("Occupy | Occupying seats %v for cinema id %d\n", in.Seats, in.Id)
+
 	handler.mux.Lock()
 	defer handler.mux.Unlock()
 
 	cinema, ok := handler.cinemas[in.Id]
 
 	if !ok {
-		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		err := fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		log.Printf("Occupy | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	for _, seat := range in.Seats {
@@ -114,17 +142,23 @@ func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.Occup
 	handler.cinemas[in.Id] = cinema
 
 	out.Seats = cinema.Seats
+
+	log.Printf("Occupy | Successfully occupied seats %v for cinema id %d\n", in.Seats, in.Id)
 	return nil
 }
 
 func (handler *CinemaServiceHandler) Free(ctx context.Context, in *proto.OccupiedRequest, out *proto.OccupiedResponse) error {
+	log.Printf("Free | Freeing seats %v for cinema id %d\n", in.Seats, in.Id)
+
 	handler.mux.Lock()
 	defer handler.mux.Unlock()
 
 	cinema, ok := handler.cinemas[in.Id]
 
 	if !ok {
-		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		err := fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		log.Printf("Free | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	for _, seat := range in.Seats {
@@ -133,10 +167,14 @@ func (handler *CinemaServiceHandler) Free(ctx context.Context, in *proto.Occupie
 	handler.cinemas[in.Id] = cinema
 
 	out.Seats = cinema.Seats
+
+	log.Printf("Free | Successfully freed seats %v for cinema id %d\n", in.Seats, in.Id)
 	return nil
 }
 
 func (handler *CinemaServiceHandler) List(ctx context.Context, in *proto.ListRequest, out *proto.ListResponse) error {
+	log.Printf("List | Listing all cinemas...\n")
+
 	handler.mux.RLock()
 	defer handler.mux.RUnlock()
 
@@ -148,17 +186,22 @@ func (handler *CinemaServiceHandler) List(ctx context.Context, in *proto.ListReq
 	}
 	out.Data = data
 
+	log.Printf("List | Successfully listed all %d cinemas\n", len(out.Data))
 	return nil
 }
 
 func (handler *CinemaServiceHandler) AreAvailable(ctx context.Context, in *proto.AvailableRequest, out *proto.AvailableResponse) error {
+	log.Printf("AreAvailable | Checking if seats %v are available for cinema %d\n", in.Seats, in.Id)
+
 	handler.mux.RLock()
 	defer handler.mux.RUnlock()
 
 	cinema, ok := handler.cinemas[in.Id]
 
 	if !ok {
-		return fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		err := fmt.Errorf("sorry, couldn't find cinema with id %d", in.Id)
+		log.Printf("AreAvailable | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	available := true
@@ -182,5 +225,12 @@ func (handler *CinemaServiceHandler) AreAvailable(ctx context.Context, in *proto
 
 	out.Available = available
 
+	var logMessage string
+	if available {
+		logMessage = "Seats are available!"
+	} else {
+		logMessage = "Seats are unavailable!"
+	}
+	log.Printf("AreAvailable | Successfully checked whether seats %v in cinema %d are available -> %s\n", in.Seats, in.Id, logMessage)
 	return nil
 }

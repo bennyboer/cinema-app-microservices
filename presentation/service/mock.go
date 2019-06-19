@@ -59,3 +59,11 @@ func (s *MockPresentationService) ReadAll(ctx context.Context, in *proto.ReadAll
 func (s *MockPresentationService) Delete(ctx context.Context, in *proto.DeleteRequest, opts ...client.CallOption) (*proto.DeleteResponse, error) {
 	return &proto.DeleteResponse{}, nil
 }
+
+func (s *MockPresentationService) DeleteForCinemas(ctx context.Context, in *proto.DeleteForCinemasRequest, opts ...client.CallOption) (*proto.DeleteForCinemasResponse, error) {
+	return &proto.DeleteForCinemasResponse{}, nil
+}
+
+func (s *MockPresentationService) DeleteForMovies(ctx context.Context, in *proto.DeleteForMoviesRequest, opts ...client.CallOption) (*proto.DeleteForMoviesResponse, error) {
+	return &proto.DeleteForMoviesResponse{}, nil
+}

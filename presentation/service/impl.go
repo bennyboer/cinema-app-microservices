@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 	reservation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
+	"log"
 	"sync"
 )
 
@@ -42,8 +43,12 @@ func (h *PresentationServiceHandler) findPresentation(cinemaID int64, movieID in
 }
 
 func (h *PresentationServiceHandler) Create(context context.Context, request *proto.CreateRequest, response *proto.CreateResponse) error {
+	log.Printf("Create | Creating presentation for movie id %d in cinema id %d\n", request.Data.MovieId, request.Data.CinemaId)
+
 	if request.Data.CinemaId < 0 || request.Data.MovieId < 0 {
-		return fmt.Errorf("ids within the presentation data need to be non-negative")
+		err := fmt.Errorf("ids within the presentation data need to be non-negative")
+		log.Printf("Create | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	h.mux.Lock()
@@ -52,7 +57,9 @@ func (h *PresentationServiceHandler) Create(context context.Context, request *pr
 	// Check if already exists
 	_, found := h.findPresentation(request.Data.CinemaId, request.Data.MovieId)
 	if found {
-		return fmt.Errorf("presentation is already available")
+		err := fmt.Errorf("presentation is already available")
+		log.Printf("Create | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	// Create
@@ -61,12 +68,17 @@ func (h *PresentationServiceHandler) Create(context context.Context, request *pr
 
 	response.CreatedId = h.lastID
 
+	log.Printf("Create | Successfully created presentation with id %d\n", response.CreatedId)
 	return nil
 }
 
 func (h *PresentationServiceHandler) FindForCinema(context context.Context, request *proto.FindForCinemaRequest, response *proto.FindForCinemaResponse) error {
+	log.Printf("FindForCinema | Finding all presentations in cinema with id %d\n", request.CinemaId)
+
 	if request.CinemaId < 0 {
-		return fmt.Errorf("ids within the presentation data need to be non-negative")
+		err := fmt.Errorf("invalid cinema id passed")
+		log.Printf("FindForCinema | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	h.mux.RLock()
@@ -84,12 +96,17 @@ func (h *PresentationServiceHandler) FindForCinema(context context.Context, requ
 	response.Ids = ids
 	response.Dates = result
 
+	log.Printf("FindForCinema | Successfully found %d presentations for cinema id %d\n", len(response.Ids), request.CinemaId)
 	return nil
 }
 
 func (h *PresentationServiceHandler) FindForMovie(context context.Context, request *proto.FindForMovieRequest, response *proto.FindForMovieResponse) error {
+	log.Printf("FindForMovie | Finding all presentations for movie with id %d\n", request.MovieId)
+
 	if request.MovieId < 0 {
-		return fmt.Errorf("ids within the presentation data need to be non-negative")
+		err := fmt.Errorf("ids within the presentation data need to be non-negative")
+		log.Printf("FindForMovie | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	h.mux.RLock()
@@ -107,12 +124,17 @@ func (h *PresentationServiceHandler) FindForMovie(context context.Context, reque
 	response.Ids = ids
 	response.Dates = result
 
+	log.Printf("FindForMovie | Successfully found %d presentations for movie with id %d\n", len(response.Ids), request.MovieId)
 	return nil
 }
 
 func (h *PresentationServiceHandler) Read(context context.Context, request *proto.ReadRequest, response *proto.ReadResponse) error {
+	log.Printf("Read | Reading presentation with id %d\n", request.Id)
+
 	if request.Id < 0 {
-		return fmt.Errorf("presentation id needs to be non-negative")
+		err := fmt.Errorf("presentation id needs to be non-negative")
+		log.Printf("Read | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	h.mux.RLock()
@@ -120,15 +142,20 @@ func (h *PresentationServiceHandler) Read(context context.Context, request *prot
 
 	data, ok := h.presentations[request.Id]
 	if !ok {
-		return fmt.Errorf("could not find presentation with id %d", request.Id)
+		err := fmt.Errorf("could not find presentation with id %d", request.Id)
+		log.Printf("Read | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	response.Data = data
 
+	log.Printf("Read | Successfully read presentation with id %d\n", request.Id)
 	return nil
 }
 
 func (h *PresentationServiceHandler) ReadAll(context context.Context, request *proto.ReadAllRequest, response *proto.ReadAllResponse) error {
+	log.Printf("ReadAll | Reading all presentations...\n")
+
 	h.mux.RLock()
 	defer h.mux.RUnlock()
 
@@ -142,12 +169,17 @@ func (h *PresentationServiceHandler) ReadAll(context context.Context, request *p
 	response.Ids = ids
 	response.Dates = result
 
+	log.Printf("ReadAll | Successfully read %d presentations\n", len(response.Ids))
 	return nil
 }
 
 func (h *PresentationServiceHandler) Delete(context context.Context, request *proto.DeleteRequest, response *proto.DeleteResponse) error {
+	log.Printf("Delete | Deleting presentation with id %d\n", request.Id)
+
 	if request.Id < 0 {
-		return fmt.Errorf("presentation id needs to be non-negative")
+		err := fmt.Errorf("presentation id needs to be non-negative")
+		log.Printf("Delete | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	h.mux.Lock()
@@ -155,7 +187,10 @@ func (h *PresentationServiceHandler) Delete(context context.Context, request *pr
 	_, ok := h.presentations[request.Id]
 	if !ok {
 		h.mux.Unlock()
-		return fmt.Errorf("presentation could not be found")
+
+		err := fmt.Errorf("presentation could not be found")
+		log.Printf("Delete | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	delete(h.presentations, request.Id)
@@ -163,35 +198,91 @@ func (h *PresentationServiceHandler) Delete(context context.Context, request *pr
 	h.mux.Unlock()
 
 	// Notify reservation service that the presentation has been deleted -> Delete all related reservations
-	err := h.deleteRelatedReservations(context, request.Id)
+	err := h.deleteRelatedReservations(context, []int64{request.Id})
 	if err != nil {
+		log.Printf("Delete | ERROR -> %s\n", err.Error())
 		return err
 	}
 
+	log.Printf("Delete | Successfully deleted presentation with id %d\n", request.Id)
+	return nil
+}
+
+func (h *PresentationServiceHandler) DeleteForCinemas(context context.Context, request *proto.DeleteForCinemasRequest, response *proto.DeleteForCinemasResponse) error {
+	log.Printf("DeleteForCinemas | Deleting presentations for cinema ids %v\n", request.CinemaIds)
+
+	// Create lookup for cinema Ids
+	lp := make(map[int64]bool, len(request.CinemaIds))
+	for _, cinemaId := range request.CinemaIds {
+		lp[cinemaId] = true
+	}
+
+	h.mux.Lock()
+
+	deletedIds := make([]int64, 0)
+	for id, data := range h.presentations {
+		if _, del := lp[data.CinemaId]; del {
+			delete(h.presentations, id)
+
+			deletedIds = append(deletedIds, id)
+		}
+	}
+
+	h.mux.Unlock()
+
+	// Notify reservation service to delete all reservations for the deleted presentations
+	err := h.deleteRelatedReservations(context, deletedIds)
+	if err != nil {
+		log.Printf("DeleteForCinemas | ERROR -> %s\n", err.Error())
+		return err
+	}
+
+	log.Printf("DeleteForCinemas | Successfully deleted presentations for cinema ids %v\n", request.CinemaIds)
+	return nil
+}
+
+func (h *PresentationServiceHandler) DeleteForMovies(context context.Context, request *proto.DeleteForMoviesRequest, response *proto.DeleteForMoviesResponse) error {
+	log.Printf("DeleteForMovies | Deleting presentations for movie ids %v\n", request.MovieIds)
+
+	// Create lookup for movie Ids
+	lp := make(map[int64]bool, len(request.MovieIds))
+	for _, movieId := range request.MovieIds {
+		lp[movieId] = true
+	}
+
+	h.mux.Lock()
+
+	deletedIds := make([]int64, 0)
+	for id, data := range h.presentations {
+		if _, del := lp[data.MovieId]; del {
+			delete(h.presentations, id)
+
+			deletedIds = append(deletedIds, id)
+		}
+	}
+
+	h.mux.Unlock()
+
+	// Notify reservation service to delete all reservations for the deleted presentations
+	err := h.deleteRelatedReservations(context, deletedIds)
+	if err != nil {
+		log.Printf("DeleteForMovies | ERROR -> %s\n", err.Error())
+		return err
+	}
+
+	log.Printf("DeleteForMovies | Successfully deleted presentations for movie ids %v\n", request.MovieIds)
 	return nil
 }
 
 // Delete all reservations related to the passed presentation id.
-func (h *PresentationServiceHandler) deleteRelatedReservations(context context.Context, presentationID int64) error {
+func (h *PresentationServiceHandler) deleteRelatedReservations(context context.Context, presentationIDs []int64) error {
 	reservationService := h.getReservationService()
 
-	rsp, err := reservationService.ReadAll(context, &reservation.ReadAllRequest{})
+	_, err := reservationService.CancelForPresentations(context, &reservation.CancelForPresentationsRequest{
+		PresentationIds: presentationIDs,
+	})
 	if err != nil {
 		return err
-	}
-
-	for i := 0; i < len(rsp.Ids); i++ {
-		reservationID := rsp.Ids[i]
-		data := rsp.Dates[i]
-
-		if data.PresentationId == presentationID {
-			_, err := reservationService.Cancel(context, &reservation.CancelReservationRequest{
-				ReservationId: reservationID,
-			})
-			if err != nil {
-				return err
-			}
-		}
 	}
 
 	return nil

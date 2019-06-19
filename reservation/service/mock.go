@@ -24,6 +24,14 @@ func (s *MockReservationService) Cancel(ctx context.Context, in *proto.CancelRes
 	return &proto.CancelReservationResponse{}, nil
 }
 
+func (s *MockReservationService) CancelForPresentations(ctx context.Context, in *proto.CancelForPresentationsRequest, opts ...client.CallOption) (*proto.CancelForPresentationsResponse, error) {
+	return &proto.CancelForPresentationsResponse{}, nil
+}
+
+func (s *MockReservationService) CancelForUsers(ctx context.Context, in *proto.CancelForUsersRequest, opts ...client.CallOption) (*proto.CancelForUsersResponse, error) {
+	return &proto.CancelForUsersResponse{}, nil
+}
+
 func (s *MockReservationService) ReadAll(ctx context.Context, in *proto.ReadAllRequest, opts ...client.CallOption) (*proto.ReadAllResponse, error) {
 	return &proto.ReadAllResponse{
 		Ids: []int64{1},

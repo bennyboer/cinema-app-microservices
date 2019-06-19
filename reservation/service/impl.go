@@ -7,6 +7,7 @@ import (
 	presentation "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/presentation/proto"
 	"github.com/ob-vss-ss19/blatt-4-sudo_blatt4/reservation/proto"
 	user "github.com/ob-vss-ss19/blatt-4-sudo_blatt4/user/proto"
+	"log"
 	"sync"
 )
 
@@ -144,8 +145,12 @@ func (h *ReservationServiceHandler) getCinemaService() cinema.CinemaService {
 }
 
 func (h *ReservationServiceHandler) Reserve(context context.Context, request *proto.ReservationRequest, response *proto.ReservationResponse) error {
+	log.Printf("Reserve | Trying to reserve seats %v for presentation id %d for user id %d\n", request.Data.Seats, request.Data.PresentationId, request.Data.UserId)
+
 	if !h.checkUserAvailable(context, request.Data.UserId) {
-		return fmt.Errorf("could not find user with id %d to make reservation for", request.Data.UserId)
+		err := fmt.Errorf("could not find user with id %d to make reservation for", request.Data.UserId)
+		log.Printf("Reserve | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	h.mux.Lock()
@@ -153,11 +158,14 @@ func (h *ReservationServiceHandler) Reserve(context context.Context, request *pr
 
 	available, err := h.checkSeatsAvailable(context, request.Data.Seats, request.Data.PresentationId)
 	if err != nil {
+		log.Printf("Reserve | ERROR -> %s\n", err.Error())
 		return err
 	}
 
 	if !available {
 		response.Available = false
+
+		log.Printf("Reserve | Could not reserve seats %v for presentation %d for user %d since they are unavailable\n", request.Data.Seats, request.Data.PresentationId, request.Data.UserId)
 		return nil
 	}
 
@@ -171,60 +179,137 @@ func (h *ReservationServiceHandler) Reserve(context context.Context, request *pr
 	h.reservations[id] = request.Data // Save for later
 	h.toAccept[id] = true             // Mark to be accepted
 
+	log.Printf("Reserve | Successfully created reservation offer for seats %v, presentation id %d and user id %d which is yet to be accepted\n", request.Data.Seats, request.Data.PresentationId, request.Data.UserId)
 	return nil
 }
 
 func (h *ReservationServiceHandler) AcceptReservation(context context.Context, request *proto.AcceptReservationRequest, response *proto.AcceptReservationResponse) error {
+	log.Printf("AcceptReservation | Accepting reservation offer with id %d\n", request.Id)
+
 	h.mux.Lock()
 	defer h.mux.Unlock()
 
 	// Check if reservation id is to be accepted
 	_, ok := h.toAccept[request.Id]
 	if !ok {
-		return fmt.Errorf("the passed reservation id is not marked to be accepted")
+		err := fmt.Errorf("the passed reservation id is not marked to be accepted")
+		log.Printf("AcceptReservation | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	// Fetch stored reservation
 	reservation, ok := h.reservations[request.Id]
 	if !ok {
-		return fmt.Errorf("could not find reservation with the passed id")
+		err := fmt.Errorf("could not find reservation with the passed id")
+		log.Printf("AcceptReservation | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	// Try to mark seats as taken -> Will fail if seats have already been taken
 	err := h.markSeatsAsAvailable(context, false, reservation.Seats, reservation.PresentationId)
 	if err != nil {
+		log.Printf("AcceptReservation | ERROR while trying to mark seats as taken -> %s\n", err.Error())
 		return err
 	}
 
-	// Remove from marked for acception set
+	// Remove from marked for acceptation set
 	delete(h.toAccept, request.Id)
 
+	log.Printf("AcceptReservation | Successfully accepted reservation offer with id %d\n", request.Id)
 	return nil
 }
 
 func (h *ReservationServiceHandler) Cancel(context context.Context, request *proto.CancelReservationRequest, response *proto.CancelReservationResponse) error {
+	log.Printf("Cancel | Cancelling reservation with id %d\n", request.ReservationId)
+
 	h.mux.Lock()
 	defer h.mux.Unlock()
 
 	// Check if reservation exists
 	reservation, ok := h.reservations[request.ReservationId]
 	if !ok {
-		return fmt.Errorf("cannot cancel a non-existing reservation")
+		err := fmt.Errorf("cannot cancel a non-existing reservation")
+		log.Printf("Cancel | ERROR -> %s\n", err.Error())
+		return err
 	}
 
 	// Mark seats as available
 	err := h.markSeatsAsAvailable(context, true, reservation.Seats, reservation.PresentationId)
 	if err != nil {
+		log.Printf("Cancel | ERROR while trying to free seats -> %s\n", err.Error())
 		return err
 	}
 
 	// Delete reservation
 	delete(h.reservations, request.ReservationId)
 
+	log.Printf("Cancel | Successfully cancelled reservation with id %d\n", request.ReservationId)
+	return nil
+}
+
+func (h *ReservationServiceHandler) CancelForPresentations(context context.Context, request *proto.CancelForPresentationsRequest, response *proto.CancelForPresentationsResponse) error {
+	log.Printf("CancelForPresentations | Cancelling all reservations for presentation ids %v\n", request.PresentationIds)
+
+	// Create presentation id lookup
+	lp := make(map[int64]bool, len(request.PresentationIds))
+	for _, presentationId := range request.PresentationIds {
+		lp[presentationId] = true
+	}
+
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
+	for id, reservation := range h.reservations {
+		if _, del := lp[reservation.PresentationId]; del {
+			// Delete reservation
+			delete(h.reservations, id)
+			log.Printf("CancelForPresentations | Deleted presentation with id %d\n", id)
+
+			// Delete if in to be accepted
+			if _, toBeAccepted := h.toAccept[id]; toBeAccepted {
+				// Delete entry
+				delete(h.toAccept, id)
+			}
+		}
+	}
+
+	log.Printf("CancelForPresentations | Successfully cancelled all reservations for presentation ids %v\n", request.PresentationIds)
+	return nil
+}
+
+func (h *ReservationServiceHandler) CancelForUsers(context context.Context, request *proto.CancelForUsersRequest, response *proto.CancelForUsersResponse) error {
+	log.Printf("CancelForUsers | Cancelling all reservations for user ids %v\n", request.UserIds)
+
+	// Create user id lookup
+	lp := make(map[int64]bool, len(request.UserIds))
+	for _, userId := range request.UserIds {
+		lp[userId] = true
+	}
+
+	h.mux.Lock()
+	defer h.mux.Unlock()
+
+	for id, reservation := range h.reservations {
+		if _, del := lp[reservation.UserId]; del {
+			// Delete reservation
+			delete(h.reservations, id)
+			log.Printf("CancelForUsers | Deleted presentation with id %d\n", id)
+
+			// Delete if in to be accepted
+			if _, toBeAccepted := h.toAccept[id]; toBeAccepted {
+				// Delete entry
+				delete(h.toAccept, id)
+			}
+		}
+	}
+
+	log.Printf("CancelForUsers | Successfully cancelled all reservations for user ids %v\n", request.UserIds)
 	return nil
 }
 
 func (h *ReservationServiceHandler) ReadAll(context context.Context, request *proto.ReadAllRequest, response *proto.ReadAllResponse) error {
+	log.Printf("ReadAll | Reading all reservations...\n")
+
 	h.mux.RLock()
 	defer h.mux.RUnlock()
 
@@ -242,5 +327,6 @@ func (h *ReservationServiceHandler) ReadAll(context context.Context, request *pr
 	response.Ids = ids
 	response.Dates = dates
 
+	log.Printf("ReadAll | Successfully read %d reservations\n", len(response.Ids))
 	return nil
 }
