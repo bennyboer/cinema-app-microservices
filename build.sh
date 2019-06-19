@@ -29,12 +29,6 @@ cd reservation
 . ./build.sh "$1"
 cd ..
 
-echo "Building client..."
-chmod +x ./client/build.sh
-cd client
-. ./build.sh "$1"
-cd ..
-
 if [[ "$1" == "debug" ]]; then
     read -n 1 -s -r -p "Press any key to continue"
 fi

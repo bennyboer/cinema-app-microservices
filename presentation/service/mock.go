@@ -71,4 +71,3 @@ func (s *MockPresentationService) DeleteForMovies(ctx context.Context, in *proto
 func (s *MockPresentationService) Clear(ctx context.Context, in *proto.ClearRequest, opts ...client.CallOption) (*proto.ClearResponse, error) {
 	return &proto.ClearResponse{}, nil
 }
-

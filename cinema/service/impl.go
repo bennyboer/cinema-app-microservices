@@ -141,7 +141,17 @@ func (handler *CinemaServiceHandler) Occupy(ctx context.Context, in *proto.Occup
 	}
 
 	for _, seat := range in.Seats {
-		cinema.Seats[((seat.Row-1)*cinema.SeatCount)+seat.Seat-1].Occupied = true
+		seatIndex := ((seat.Row - 1) * cinema.SeatCount) + seat.Seat - 1
+
+		s := cinema.Seats[seatIndex]
+
+		if s.Occupied {
+			err := fmt.Errorf("the seat in row %d with number %d is already occupied", s.Row, s.Seat)
+			log.Printf("Occupy | ERROR -> %s\n", err.Error())
+			return err
+		}
+
+		s.Occupied = true // Mark as occupied
 	}
 	handler.cinemas[in.Id] = cinema
 

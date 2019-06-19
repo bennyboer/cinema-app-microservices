@@ -1,4 +1,4 @@
-module github.com/ob-vss-ss19/blatt-4-sudo_blatt4/client
+module github.com/ob-vss-ss19/blatt-4-sudo_blatt4/integrationtests
 
 go 1.12
 
